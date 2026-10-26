@@ -35,6 +35,18 @@ Environment:
 | `PORT` | 5000 | base path is `/it4788` |
 | `JWT_SECRET` | dev value | change it |
 | `TZ` | `Asia/Ho_Chi_Minh` | group time, read from the group leader |
+| `SMTP_HOST` | empty | empty host runs the sender in noop mode, which returns the same code. Set it to the local capture for the demo |
+| `SMTP_PORT` | 1025 | the local capture listens here, with its web page on 8025 |
+| `EXPO_PUSH_URL` | empty | empty url reports the queue only, as the rule in D33 |
+
+Run the local mail capture for the demo, so no provider account is needed:
+
+```bash
+docker run -p 1025:1025 -p 8025:8025 mailhog/mailhog
+```
+
+Then send a code with an empty `SMTP_HOST` first, to see the noop path, and set
+`SMTP_HOST=127.0.0.1` to see the message arrive on the capture page.
 
 Tests: `npm test` for Jest, `npm run test:integration` for the replica set proof,
 `npm run test:api` for the HTTP layer.

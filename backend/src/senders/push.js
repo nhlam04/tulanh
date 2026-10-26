@@ -23,9 +23,4 @@ async function sendPush(devices, lot, timezone) {
 }
 
 // Email rule: only the code and the receiver leave the server. No template text.
-async function sendEmail(to, code) {
-  if (!process.env.SMTP_HOST) return { code: '00048', data: { queued: true } };
-  return { code: '00048', data: { sent: true, to, code, host: process.env.SMTP_HOST } };
-}
-
-module.exports = { sendPush, sendEmail, ttl: config.codeTtlMs };
+module.exports = { sendPush, ttl: config.codeTtlMs };

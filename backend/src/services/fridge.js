@@ -60,4 +60,12 @@ async function lotsByFood(deps, ctx) {
   return { code: '00386', data: { lots } };
 }
 
-module.exports = { createLot, updateLot, deleteLot, listLots, lotsByFood };
+async function getLot(deps, ctx) {
+  if (!ctx.groupId) return { code: '00225' };
+  const lot = await deps.repos.fridge_lots.findOne({ _id: ctx.input.lotId });
+  if (!lot) return { code: '00213' };
+  if (String(lot.group_id) !== String(ctx.groupId)) return { code: '00212' };
+  return { code: '00237', data: { lot } };
+}
+
+module.exports = { createLot, updateLot, deleteLot, listLots, lotsByFood, getLot };

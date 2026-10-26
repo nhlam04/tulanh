@@ -12,7 +12,7 @@ async function createRecipe(deps, ctx) {
     created_at: deps.now(),
     updated_at: deps.now(),
   });
-  return { code: '00378', data: { recipe } };
+  return { code: '00357', data: { recipe } };
 }
 
 async function addIngredients(deps, ctx) {
@@ -51,4 +51,25 @@ async function updateRecipe(deps, ctx) {
   return { code: '00370', data: { recipe: await deps.repos.recipes.updateOne({ _id: recipe._id }, patch) } };
 }
 
-module.exports = { createRecipe, addIngredients, listRecipes, updateRecipe };
+async function deleteRecipe(deps, ctx) {
+  if (!ctx.input.recipeId) return { code: '00372' };
+  const recipe = await deps.repos.recipes.findOne({ _id: ctx.input.recipeId });
+  if (!recipe) return { code: '00373' };
+  if (!permissions.canWrite(recipe, ctx)) return { code: '00167x' };
+  await deps.repos.recipes.deleteOne({ _id: recipe._id });
+  return { code: '00376' };
+}
+
+// Ingredient match is exact (D77), so the food id comes from the stored row.
+async function recipesByFood(deps, ctx) {
+  if (!ctx.groupId) return { code: '00345' };
+  const rows = await deps.repos.ingredients.find({ food_id: ctx.input.foodId });
+  const recipes = [];
+  for (const row of rows) {
+    const recipe = await deps.repos.recipes.findOne({ _id: row.recipe_id });
+    if (recipe && String(recipe.group_id) === String(ctx.groupId)) recipes.push(recipe);
+  }
+  return { code: '00348', data: { recipes } };
+}
+
+module.exports = { createRecipe, addIngredients, listRecipes, updateRecipe, deleteRecipe, recipesByFood };

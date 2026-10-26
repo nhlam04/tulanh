@@ -173,3 +173,65 @@ describe('meal plan, recipe, suggestion', () => {
     expect(hit.code).toBe('00394');
   });
 });
+
+describe('the CRUD paths that the spec lists', () => {
+  test('category and unit change by name (codes 00141, 00146, 00122, 00128)', async () => {
+    const deps = seed();
+    const ctx = { userId: 'u1', role: 'admin', groupId: 'g1' };
+    const catalog = require('../../src/services/catalog');
+    await catalog.createCategory(deps, { ...ctx, input: { name: 'rau' } });
+    await catalog.createUnit(deps, { ...ctx, input: { unitName: 'kg' } });
+    expect((await catalog.editCategory(deps, { ...ctx, input: { oldName: 'rau', newName: 'trai cay' } })).code).toBe('00141');
+    expect((await catalog.editCategory(deps, { ...ctx, input: { oldName: 'rau', newName: 'trai cay' } })).code).toBe('00138');
+    expect((await catalog.deleteCategory(deps, { ...ctx, input: { name: 'trai cay' } })).code).toBe('00146');
+    expect((await catalog.editUnit(deps, { ...ctx, input: { oldName: 'kg', newName: 'gam' } })).code).toBe('00122');
+    expect((await catalog.deleteUnit(deps, { ...ctx, input: { unitName: 'gam' } })).code).toBe('00128');
+  });
+
+  test('list create, change and delete follow Rule C (codes 00249, 00266, 00275, 00261)', async () => {
+    const deps = seed();
+    const leader = { userId: 'u1', role: 'group_leader', groupId: 'g1' };
+    const member = { userId: 'u2', role: 'user', groupId: 'g1' };
+    await deps.repos.users.updateOne({ _id: 'u2' }, { group_id: 'g1' });
+    const created = await shopping.createList(deps, { ...leader, input: { name: 'di cho', assignToUsername: 'binh' } });
+    expect(created.code).toBe('00249');
+    expect((await shopping.updateList(deps, { ...member, input: { listId: created.data.list._id, newName: 'sieu thi' } })).code).toBe('00261');
+    expect((await shopping.updateList(deps, { ...leader, input: { listId: created.data.list._id, newName: 'sieu thi' } })).code).toBe('00266');
+    expect((await shopping.deleteList(deps, { ...leader, input: { listId: created.data.list._id } })).code).toBe('00275');
+  });
+
+  test('task change and delete read the row owner (codes 00312, 00299, 00307)', async () => {
+    const deps = seed();
+    const leader = { userId: 'u1', role: 'group_leader', groupId: 'g1' };
+    const member = { userId: 'u2', role: 'user', groupId: 'g1' };
+    await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'thit', created_by: 'u1' });
+    await deps.repos.foods.insertOne({ _id: 'f2', group_id: 'g1', name: 'ca', created_by: 'u2' });
+    await deps.repos.shopping_lists.insertOne({ _id: 'l1', group_id: 'g1', created_by: 'u1' });
+    const added = await shopping.addTasks(deps, { ...leader, input: { listId: 'l1', tasks: [{ foodId: 'f1', quantity: 2, buyerUsername: 'an', requestId: 'r1' }] } });
+    const task = added.data.tasks[0];
+    expect((await shopping.listTasks(deps, { ...member, input: { listId: 'l1' } })).data.tasks.length).toBe(1);
+    expect((await shopping.updateTask(deps, { ...member, input: { taskId: task._id, newFoodName: 'ca' } })).code).toBe('00307');
+    expect((await shopping.updateTask(deps, { ...leader, input: { taskId: task._id, newFoodName: 'ca' } })).code).toBe('00312');
+    expect((await shopping.deleteTask(deps, { ...leader, input: { taskId: task._id } })).code).toBe('00299');
+  });
+
+  test('recipe delete and read by food (codes 00376, 00348)', async () => {
+    const deps = seed();
+    const ctx = { userId: 'u1', role: 'user', groupId: 'g1' };
+    await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'tao', created_by: 'u1' });
+    await deps.repos.recipes.insertOne({ _id: 'r1', group_id: 'g1', name: 'salad', created_by: 'u1' });
+    await recipe.addIngredients(deps, { ...ctx, input: { recipeId: 'r1', ingredients: [{ foodName: 'tao', quantity: 1 }] } });
+    expect((await recipe.recipesByFood(deps, { ...ctx, input: { foodId: 'f1' } })).data.recipes.length).toBe(1);
+    expect((await recipe.deleteRecipe(deps, { ...ctx, input: { recipeId: 'r1' } })).code).toBe('00376');
+  });
+
+  test('the image rule keeps the stored path and the size cap (D13, code 00158)', async () => {
+    const deps = seed();
+    const images = require('../../src/services/images');
+    const ok = await images.storeImage(deps, { userId: 'u1', groupId: 'g1', input: { image: 'Tao Photo.PNG', size: 200000 } });
+    expect(ok.code).toBe('00098');
+    expect(ok.data.saved).toBe('uploads/tao_photo.png');
+    const big = await images.storeImage(deps, { userId: 'u1', groupId: 'g1', input: { image: 'big.png', size: 20 * 1024 * 1024 } });
+    expect(big.code).toBe('00158');
+  });
+});

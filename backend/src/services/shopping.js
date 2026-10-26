@@ -85,4 +85,93 @@ function reposOf(store) {
   return out;
 }
 
-module.exports = { addTasks, claimTask, markBought, reposOf, useWithin };
+// List rule (Rule C): the caller owns the list they created, or is the group leader.
+// Codes 00258, 00261, 00270, 00273 read as group admin, so the report shows the change.
+async function createList(deps, ctx) {
+  if (!ctx.groupId) return { code: '00210' };
+  const input = ctx.input;
+  if (!input.name || !input.assignToUsername) return { code: '00238' };
+  const target = await deps.repos.users.findOne({ username: input.assignToUsername });
+  if (!target) return { code: '00245' };
+  if (String(target.group_id) !== String(ctx.groupId)) return { code: '00246' };
+  const list = await deps.repos.shopping_lists.insertOne({
+    group_id: ctx.groupId,
+    name: input.name,
+    assign_to: input.assignToUsername,
+    note: input.note || null,
+    target_date: input.date || null,
+    created_by: ctx.userId,
+    created_at: deps.now(),
+    updated_at: deps.now(),
+  });
+  return { code: '00249', data: { list } };
+}
+
+async function listLists(deps, ctx) {
+  if (!ctx.groupId) return { code: '00210' };
+  return { code: '00292', data: { lists: await deps.repos.shopping_lists.find({ group_id: ctx.groupId }) } };
+}
+
+async function updateList(deps, ctx) {
+  if (!ctx.input.listId) return { code: '00251' };
+  const list = await deps.repos.shopping_lists.findOne({ _id: ctx.input.listId });
+  if (!list) return { code: '00260' };
+  if (!permissions.canWrite(list, ctx)) return { code: '00261' };
+  const patch = {};
+  if (ctx.input.newName) patch.name = ctx.input.newName;
+  if (ctx.input.newNote) patch.note = ctx.input.newNote;
+  if (ctx.input.newDate) patch.target_date = ctx.input.newDate;
+  if (ctx.input.newAssignToUsername) {
+    const target = await deps.repos.users.findOne({ username: ctx.input.newAssignToUsername });
+    if (!target) return { code: '00262' };
+    if (String(target.group_id) !== String(ctx.groupId)) return { code: '00263' };
+    patch.assign_to = target.username;
+  }
+  if (!Object.keys(patch).length) return { code: '00252' };
+  patch.updated_at = deps.now();
+  return { code: '00266', data: { list: await deps.repos.shopping_lists.updateOne({ _id: list._id }, patch) } };
+}
+
+async function deleteList(deps, ctx) {
+  if (!ctx.input.listId) return { code: '00268' };
+  const list = await deps.repos.shopping_lists.findOne({ _id: ctx.input.listId });
+  if (!list) return { code: '00272' };
+  if (!permissions.canWrite(list, ctx)) return { code: '00273' };
+  await deps.repos.shopping_lists.deleteOne({ _id: list._id });
+  return { code: '00275' };
+}
+
+async function listTasks(deps, ctx) {
+  if (!ctx.input.listId) return { code: '00277' };
+  const list = await deps.repos.shopping_lists.findOne({ _id: ctx.input.listId });
+  if (!list) return { code: '00283' };
+  return { code: '00098', data: { tasks: await deps.repos.shopping_tasks.find({ list_id: list._id }) } };
+}
+
+async function updateTask(deps, ctx) {
+  if (!ctx.input.taskId) return { code: '00301' };
+  const task = await deps.repos.shopping_tasks.findOne({ _id: ctx.input.taskId });
+  if (!task) return { code: '00306' };
+  if (!permissions.canWrite(task, ctx)) return { code: '00307' };
+  const patch = {};
+  if (ctx.input.newFoodName) {
+    const food = await deps.repos.foods.findOne({ group_id: ctx.groupId, name: ctx.input.newFoodName });
+    if (!food) return { code: '00308' };
+    patch.food_id = food._id;
+  }
+  if (ctx.input.newQuantity !== undefined) patch.quantity = Number(ctx.input.newQuantity);
+  if (!Object.keys(patch).length) return { code: '00302' };
+  patch.updated_at = deps.now();
+  return { code: '00312', data: { task: await deps.repos.shopping_tasks.updateOne({ _id: task._id }, patch) } };
+}
+
+async function deleteTask(deps, ctx) {
+  if (!ctx.input.taskId) return { code: '00294' };
+  const task = await deps.repos.shopping_tasks.findOne({ _id: ctx.input.taskId });
+  if (!task) return { code: '00296' };
+  if (!permissions.canWrite(task, ctx)) return { code: '00297' };
+  await deps.repos.shopping_tasks.deleteOne({ _id: task._id });
+  return { code: '00299' };
+}
+
+module.exports = { addTasks, claimTask, markBought, reposOf, useWithin, createList, listLists, updateList, deleteList, listTasks, updateTask, deleteTask };

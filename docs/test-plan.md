@@ -30,3 +30,11 @@ Run set:
 
 Cross-check pairs, from the assignment table: Lâm and Việt check the mobile screens,
 Minh and Hùng check the API, and Hòa checks the whole system.
+
+What runs on this machine today: Jest unit tests over the fake store, the node runner
+integration tests against a single-node replica set, the HTTP layer test, and the two
+client rule tests. React Native Testing Library and Detox need the React Native toolchain,
+so those runs happen on a device, not here.
+
+Commit rule: one member's scope per commit, with the member's name in the message, for
+example `core: Lâm - ...` or `business: Việt - ...`. Git lives in `implementation/` only.

@@ -1,5 +1,13 @@
 {
   "name": "ishop",
   "private": true,
-  "workspaces": ["shared", "backend", "app"]
+  "workspaces": [
+    "shared",
+    "backend",
+    "app",
+    "admin-web"
+  ],
+  "dependencies": {
+    "@types/jest": "^29.5.9"
+  }
 }

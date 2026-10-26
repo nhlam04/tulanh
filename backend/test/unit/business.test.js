@@ -1,11 +1,11 @@
 // Business scope: models, group, food, fridge, shopping, consumption, reports, jobs.
-const { seed } = require('./support');
-const food = require('../src/services/food');
-const fridge = require('../src/services/fridge');
-const shopping = require('../src/services/shopping');
-const consumption = require('../src/services/consumption');
-const report = require('../src/services/report');
-const jobs = require('../src/jobs/reminder');
+const { seed } = require('../support');
+const food = require('../../src/services/food');
+const fridge = require('../../src/services/fridge');
+const shopping = require('../../src/services/shopping');
+const consumption = require('../../src/services/consumption');
+const report = require('../../src/services/report');
+const jobs = require('../../src/jobs/reminder');
 
 describe('name rules and lot model', () => {
   test('duplicate food name returns the code from the unique rule', async () => {

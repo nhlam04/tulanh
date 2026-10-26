@@ -1,28 +1,28 @@
 // Core scope: architecture, auth, permission, the response shape.
-const { seed } = require('./support');
-const auth = require('../src/services/auth');
-const food = require('../src/services/food');
+const { seed } = require('../support');
+const auth = require('../../src/services/auth');
+const food = require('../../src/services/food');
 
 describe('auth gates', () => {
   test('duplicate email keeps its own code', async () => {
     const deps = seed();
-    const result = await auth.register(deps, { email: 'a@mail.com', password: 'password1', name: 'An Nam', username: 'an' });
+    const result = await auth.register(deps, { input: { email: 'a@mail.com', password: 'password1', name: 'An Nam', username: 'an' } });
     expect(result.code).toBe('00032');
   });
 
   test('login reads the verification flag before the password check', async () => {
     const deps = seed();
-    const result = await auth.login(deps, { email: 'b@mail.com', password: 'password1' });
+    const result = await auth.login(deps, { input: { email: 'b@mail.com', password: 'password1' } });
     expect(result.code).toBe('00044');
   });
 
   test('refresh rotates the stored token (D26)', async () => {
     const deps = seed();
-    const login = await auth.login(deps, { email: 'a@mail.com', password: 'password1' });
+    const login = await auth.login(deps, { input: { email: 'a@mail.com', password: 'password1' } });
     expect(login.code).toBe('00047');
-    const next = await auth.refresh(deps, { refreshToken: login.data.refreshToken });
+    const next = await auth.refresh(deps, { input: { refreshToken: login.data.refreshToken } });
     expect(next.code).toBe('00065');
-    const replay = await auth.refresh(deps, { refreshToken: login.data.refreshToken });
+    const replay = await auth.refresh(deps, { input: { refreshToken: login.data.refreshToken } });
     expect(replay.code).toBe('00061');
   });
 });

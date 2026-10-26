@@ -4,7 +4,8 @@ const rules = require('../rules');
 
 // Auth rule (D25): one state for activation and verification. Business routes
 // read `is_verified`; login keeps its own gate, so the two codes stay apart.
-async function register(deps, input) {
+async function register(deps, ctx) {
+  const input = ctx.input;
   const shape = rules.registerShape(input);
   if (shape.code) return shape;
   const users = deps.repos.users;
@@ -33,7 +34,8 @@ async function register(deps, input) {
   return { code: '00035', data: { user: publicUser(user) } };
 }
 
-async function sendCode(deps, input) {
+async function sendCode(deps, ctx) {
+  const input = ctx.input;
   if (!input.email) return { code: '00005' };
   const user = await deps.repos.users.findOne({ email: input.email });
   if (!user) return { code: '00036' };
@@ -49,7 +51,8 @@ async function sendCode(deps, input) {
   return { code: '00048', data: { email: user.email } };
 }
 
-async function verifyCode(deps, input) {
+async function verifyCode(deps, ctx) {
+  const input = ctx.input;
   if (!input.code) return { code: '00053' };
   const row = await deps.repos.verification_codes.findOne({ user_id: input.userId, code: input.code, used_at: null });
   if (!row) return { code: '00054' };
@@ -60,7 +63,8 @@ async function verifyCode(deps, input) {
   return { code: '00058', data: { user: publicUser(user) } };
 }
 
-async function login(deps, input) {
+async function login(deps, ctx) {
+  const input = ctx.input;
   const shape = rules.loginShape(input);
   if (shape.code) return shape;
   const user = await deps.repos.users.findOne({ email: input.email });
@@ -78,7 +82,8 @@ async function login(deps, input) {
   return { code: '00047', data: { accessToken: access, refreshToken: refresh } };
 }
 
-async function refresh(deps, input) {
+async function refresh(deps, ctx) {
+  const input = ctx.input;
   if (!input.refreshToken) return { code: '00059' };
   const row = await deps.repos.refresh_tokens.findOne({ token_hash: hashToken(input.refreshToken) });
   if (!row) return { code: '00061' };

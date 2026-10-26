@@ -68,9 +68,9 @@ function buildStore(db, session = null) {
   return { collection, db, session };
 }
 
-async function connect(uri) {
+async function connect(uri, options = {}) {
   const url = uri || process.env.MONGO_URI || 'mongodb://localhost:27017/?replicaSet=rs0&directConnection=true';
-  const client = new MongoClient(url);
+  const client = new MongoClient(url, options);
   await client.connect();
   const db = client.db(process.env.DB_NAME || config.dbName);
   return {

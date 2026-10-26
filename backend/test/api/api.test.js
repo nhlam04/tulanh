@@ -1,6 +1,6 @@
-const { createApp, buildDeps } = require('../src/app');
-const { memoryStore } = require('../src/store/memory');
-const { resetRateLimit } = require('../src/middleware/core');
+const { createApp, buildDeps } = require('../../src/app');
+const { memoryStore } = require('../../src/store/memory');
+const { resetRateLimit } = require('../../src/middleware/core');
 
 let server;
 let base;

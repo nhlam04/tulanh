@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node src/server.js",
     "test": "jest",
-    "test:integration": "node --test test/integration/"
+    "test:integration": "node --test test/integration/integration.test.js"
   },
   "dependencies": {
     "bcryptjs": "3.0.3",

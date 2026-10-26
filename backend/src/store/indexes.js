@@ -6,7 +6,7 @@ const indexes = {
   membership: [{ keys: { group_id: 1, user_id: 1 }, unique: true }],
   categories: [{ keys: { name: 1 }, unique: true }],
   units: [{ keys: { name: 1 }, unique: true }],
-  foods: [{ keys: { group_id: 1, name: 1 }, unique: true }, { keys: { name: 1 }, type: 'text' }],
+  foods: [{ keys: { group_id: 1, name: 1 }, unique: true }, { keys: { name: 'text' } }],
   fridge_lots: [{ keys: { group_id: 1, use_until: 1 } }, { keys: { group_id: 1, food_id: 1 } }],
   shopping_lists: [{ keys: { group_id: 1, target_date: 1 } }],
   shopping_tasks: [{ keys: { list_id: 1, food_id: 1 }, unique: true }, { keys: { list_id: 1 } }],
@@ -24,11 +24,10 @@ const indexes = {
 async function createIndexes(db) {
   for (const [name, list] of Object.entries(indexes)) {
     for (const spec of list) {
-      await db.collection(name).createIndex(spec.keys, {
-        unique: spec.unique,
-        sparse: spec.sparse,
-        background: true,
-      });
+      const options = {};
+      if (spec.unique) options.unique = true;
+      if (spec.sparse) options.sparse = true;
+      await db.collection(name).createIndex(spec.keys, options);
     }
   }
 }

@@ -3,6 +3,7 @@ const { config } = require('./config');
 const { envelope, message } = require('./envelope');
 const { buildRouter } = require('./routes');
 const { errorHandler } = require('./middleware/core');
+const senders = require('./senders/push');
 
 const COLLECTIONS = [
   'users', 'groups', 'membership', 'categories', 'units', 'foods', 'fridge_lots',
@@ -21,8 +22,8 @@ function buildDeps(store, extra = {}) {
     services: require('./services'),
     now: extra.now || (() => new Date()),
     message,
-    sendEmail: extra.sendEmail,
-    push: extra.push,
+    sendEmail: extra.sendEmail || senders.sendEmail,
+    push: extra.push || senders.sendPush,
     emit: extra.emit || (() => {}),
     pageLimit: config.pageLimit,
     logRetentionDays: config.logRetentionDays,

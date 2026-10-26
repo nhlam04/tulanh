@@ -12,4 +12,5 @@ module.exports = {
   recipe: require('./recipe'),
   sync: require('./sync'),
   admin: require('./admin'),
+  images: require('./images'),
 };

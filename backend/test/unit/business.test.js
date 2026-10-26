@@ -5,6 +5,8 @@ const fridge = require('../../src/services/fridge');
 const shopping = require('../../src/services/shopping');
 const consumption = require('../../src/services/consumption');
 const report = require('../../src/services/report');
+const mealPlan = require('../../src/services/mealPlan');
+const recipe = require('../../src/services/recipe');
 const jobs = require('../../src/jobs/reminder');
 
 describe('name rules and lot model', () => {
@@ -114,5 +116,60 @@ describe('notification job', () => {
     const removed = await jobs.runRetention(deps);
     expect(removed).toBe(1);
     expect((await deps.repos.system_logs.find({})).length).toBe(1);
+  });
+});
+
+describe('meal plan, recipe, suggestion', () => {
+  test('the group leader owns the plan and a member does not (Rule C)', async () => {
+    const deps = seed();
+    const member = { userId: 'u1', role: 'user', groupId: 'g1' };
+    const leader = { userId: 'u2', role: 'group_leader', groupId: 'g1' };
+    await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'ca', created_by: 'u1' });
+    const denied = await mealPlan.addPlan(deps, { ...member, input: { foodName: 'ca', timestamp: '2026-10-27T00:00:00Z', name: 'sáng' } });
+    expect(denied.code).toBe('00319');
+    const added = await mealPlan.addPlan(deps, { ...leader, input: { foodName: 'ca', timestamp: '2026-10-27T00:00:00Z', name: 'sáng' } });
+    expect(added.code).toBe('00322');
+  });
+
+  test('a meal is suggested only when every ingredient is in the fridge (D77)', async () => {
+    const deps = seed();
+    const ctx = { userId: 'u1', role: 'user', groupId: 'g1' };
+    await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'tao', created_by: 'u1' });
+    await deps.repos.foods.insertOne({ _id: 'f2', group_id: 'g1', name: 'sua', created_by: 'u1' });
+    await deps.repos.recipes.insertOne({ _id: 'r1', group_id: 'g1', name: 'sinh to tao', created_by: 'u1' });
+    await deps.repos.ingredients.insertOne({ recipe_id: 'r1', food_id: 'f1', quantity: 1 });
+    await deps.repos.ingredients.insertOne({ recipe_id: 'r1', food_id: 'f2', quantity: 1 });
+    await deps.repos.fridge_lots.insertOne({ group_id: 'g1', food_id: 'f1', quantity: 2, use_until: '2026-11-01', created_by: 'u1' });
+    const notYet = await mealPlan.suggestMeals(deps, ctx);
+    expect(notYet.data.suggested.length).toBe(0);
+    await deps.repos.fridge_lots.insertOne({ group_id: 'g1', food_id: 'f2', quantity: 1, use_until: '2026-11-02', created_by: 'u1' });
+    const now = await mealPlan.suggestMeals(deps, ctx);
+    expect(now.code).toBe('00392');
+    expect(now.data.suggested.length).toBe(1);
+  });
+
+  test('the plan for a date becomes a list for the missing items', async () => {
+    const deps = seed();
+    const ctx = { userId: 'u1', role: 'group_leader', groupId: 'g1' };
+    await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'ca', created_by: 'u1' });
+    await deps.repos.recipes.insertOne({ _id: 'r1', group_id: 'g1', name: 'salad', created_by: 'u1' });
+    await deps.repos.ingredients.insertOne({ recipe_id: 'r1', food_id: 'f1', quantity: 3 });
+    await deps.repos.meal_plans.insertOne({ _id: 'p1', group_id: 'g1', plan_date: '2026-10-27', meal: 'trưa', food_id: 'f1', recipe_id: 'r1', created_by: 'u1' });
+    const out = await mealPlan.generateList(deps, { ...ctx, input: { date: '2026-10-27' } });
+    expect(out.code).toBe('00393');
+    expect(out.data.tasks.length).toBe(1);
+    const full = await mealPlan.generateList(deps, { ...ctx, input: { date: '2026-10-28' } });
+    expect(full.data.tasks.length).toBe(0);
+  });
+
+  test('an ingredient name must name the stored row (D77)', async () => {
+    const deps = seed();
+    const ctx = { userId: 'u1', role: 'user', groupId: 'g1' };
+    await deps.repos.recipes.insertOne({ _id: 'r1', group_id: 'g1', name: 'salad', created_by: 'u1' });
+    const miss = await recipe.addIngredients(deps, { ...ctx, input: { recipeId: 'r1', ingredients: [{ foodName: 'cao', quantity: 1 }] } });
+    expect(miss.code).toBe('00367');
+    await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'cao', created_by: 'u1' });
+    const hit = await recipe.addIngredients(deps, { ...ctx, input: { recipeId: 'r1', ingredients: [{ foodName: 'cao', quantity: 2 }] } });
+    expect(hit.code).toBe('00394');
   });
 });

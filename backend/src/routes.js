@@ -13,6 +13,8 @@ const services = {
   shopping: require('./services/shopping'),
   consumption: require('./services/consumption'),
   report: require('./services/report'),
+  mealPlan: require('./services/mealPlan'),
+  recipe: require('./services/recipe'),
 };
 
 // write true marks the routes that change data, so the log rule covers them.
@@ -55,6 +57,16 @@ const routes = [
   ['post', '/consumption', 'consumption.recordConsumption', true, true],
   ['get', '/reports/purchases', 'report.purchasesByCategory', false, true],
   ['get', '/reports/consumption', 'report.consumptionByReason', false, true],
+  ['post', '/meal-plans', 'mealPlan.addPlan', true, true],
+  ['get', '/meal-plans', 'mealPlan.listPlans', false, true],
+  ['put', '/meal-plans', 'mealPlan.updatePlan', true, true],
+  ['delete', '/meal-plans', 'mealPlan.deletePlan', true, true],
+  ['get', '/meal-plans/suggested', 'mealPlan.suggestMeals', false, true],
+  ['post', '/meal-plans/generate-list', 'mealPlan.generateList', true, true],
+  ['post', '/recipes', 'recipe.createRecipe', true, true],
+  ['get', '/recipes', 'recipe.listRecipes', false, true],
+  ['put', '/recipes', 'recipe.updateRecipe', true, true],
+  ['post', '/recipes/ingredients', 'recipe.addIngredients', true, true],
 ];
 
 function handle(deps, method, path, serviceName, write, needsAuth) {

@@ -4,6 +4,7 @@ const { envelope, message } = require('./envelope');
 const { buildRouter } = require('./routes');
 const { errorHandler } = require('./middleware/core');
 const senders = require('./senders/push');
+const mailer = require('./senders/mailer');
 
 const COLLECTIONS = [
   'users', 'groups', 'membership', 'categories', 'units', 'foods', 'fridge_lots',
@@ -22,7 +23,7 @@ function buildDeps(store, extra = {}) {
     services: require('./services'),
     now: extra.now || (() => new Date()),
     message,
-    sendEmail: extra.sendEmail || senders.sendEmail,
+    sendEmail: extra.sendEmail || mailer.sendEmail,
     push: extra.push || senders.sendPush,
     emit: extra.emit || (() => {}),
     pageLimit: config.pageLimit,

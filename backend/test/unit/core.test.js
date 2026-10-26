@@ -69,4 +69,18 @@ describe('sync queue and admin levels', () => {
     expect(listed.data.users.length).toBe(2);
     expect((await admin.readLogs(deps, member)).code).toBe('00017');
   });
+
+  test('the mailer runs in noop mode with no host, and sends when a transport is given', async () => {
+    const deps = seed();
+    const mailer = require('../../src/senders/mailer');
+    const noop = await mailer.sendEmail('a@mail.com', '00048');
+    expect(noop.code).toBe('00048');
+    expect(noop.data.mode).toBe('noop');
+    const fake = { sendMail: async () => ({ messageId: 'm1' }) };
+    const sent = await mailer.sendEmail('a@mail.com', '00048', fake);
+    expect(sent.data.delivered).toBe(true);
+    expect(mailer.buildTransport({ createTransport: (options) => options }, { SMTP_HOST: '127.0.0.1', SMTP_PORT: '1025' }))
+      .toEqual({ host: '127.0.0.1', port: 1025, secure: false, auth: undefined });
+    expect(mailer.buildTransport({ createTransport: () => 'x' }, {})).toBeNull();
+  });
 });

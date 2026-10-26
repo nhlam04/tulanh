@@ -8,6 +8,7 @@
     "admin-web"
   ],
   "dependencies": {
-    "@types/jest": "^29.5.9"
+    "@types/jest": "^29.5.9",
+    "nodemailer": "^10.2.1"
   }
 }

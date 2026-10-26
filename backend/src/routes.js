@@ -3,19 +3,8 @@ const { envelope } = require('./envelope');
 const { rateLimit, authenticate, attachGroup, errorHandler } = require('./middleware/core');
 const { logWrite } = require('./services/logs');
 
-const services = {
-  auth: require('./services/auth'),
-  user: require('./services/user'),
-  group: require('./services/group'),
-  catalog: require('./services/catalog'),
-  food: require('./services/food'),
-  fridge: require('./services/fridge'),
-  shopping: require('./services/shopping'),
-  consumption: require('./services/consumption'),
-  report: require('./services/report'),
-  mealPlan: require('./services/mealPlan'),
-  recipe: require('./services/recipe'),
-};
+const services = require('./services');
+
 
 // write true marks the routes that change data, so the log rule covers them.
 const routes = [
@@ -67,6 +56,11 @@ const routes = [
   ['get', '/recipes', 'recipe.listRecipes', false, true],
   ['put', '/recipes', 'recipe.updateRecipe', true, true],
   ['post', '/recipes/ingredients', 'recipe.addIngredients', true, true],
+  ['post', '/sync', 'sync.applyOps', true, true],
+  ['get', '/admin/users', 'admin.listUsers', false, true],
+  ['post', '/admin/users/role', 'admin.setRole', true, true],
+  ['post', '/admin/sessions/logout', 'admin.forceLogout', true, true],
+  ['get', '/admin/logs', 'admin.readLogs', false, true],
 ];
 
 function handle(deps, method, path, serviceName, write, needsAuth) {
@@ -84,6 +78,7 @@ function handle(deps, method, path, serviceName, write, needsAuth) {
     }
     req.resSent = true;
     res.status(result.code === '00008' ? 500 : 200).json(envelope(result.code, result.data || null));
+    if (write && req.ctx.groupId) deps.emit(req.ctx.groupId, path, result.data || null);
     if (write || String(result.code).includes('quyền') || String(result.code).includes('admin')) {
       await logWrite(deps, { userId: req.ctx.userId, groupId: req.ctx.groupId, route: path, code: result.code, ip: req.ip });
     }

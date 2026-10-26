@@ -1,0 +1,15 @@
+module.exports = {
+  auth: require('./auth'),
+  user: require('./user'),
+  group: require('./group'),
+  catalog: require('./catalog'),
+  food: require('./food'),
+  fridge: require('./fridge'),
+  shopping: require('./shopping'),
+  consumption: require('./consumption'),
+  report: require('./report'),
+  mealPlan: require('./mealPlan'),
+  recipe: require('./recipe'),
+  sync: require('./sync'),
+  admin: require('./admin'),
+};

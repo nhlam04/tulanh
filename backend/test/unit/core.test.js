@@ -40,3 +40,33 @@ describe('permission, Rule C', () => {
     expect(leader.code).toBe('00141');
   });
 });
+
+describe('sync queue and admin levels', () => {
+  test('a queued write applies once, and a replay reads the stored event (D38)', async () => {
+    const deps = seed();
+    const sync = require('../../src/services/sync');
+    await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'thit', created_by: 'u1' });
+    const lot = await deps.repos.fridge_lots.insertOne({ _id: 'lot1', group_id: 'g1', food_id: 'f1', quantity: 3, created_by: 'u1' });
+    const op = { type: 'consumption', lotId: lot._id, quantity: 1, reason: 'cook', requestId: 'q1' };
+    const ctx = { userId: 'u1', groupId: 'g1', input: { ops: [op] } };
+    const first = await sync.applyOps(deps, ctx);
+    const replay = await sync.applyOps(deps, ctx);
+    expect(first.code).toBe('00098');
+    expect(first.data.applied[0].code).toBe('00387');
+    expect(replay.data.applied[0].data.replay).toBe(true);
+    const left = await deps.repos.fridge_lots.findOne({ _id: lot._id });
+    expect(left.quantity).toBe(2);
+  });
+
+  test('admin levels read one message, not three (D28)', async () => {
+    const deps = seed();
+    const admin = require('../../src/services/admin');
+    const member = { userId: 'u1', role: 'user', groupId: null, input: {} };
+    const sys = { userId: 'u1', role: 'admin', groupId: null, input: {} };
+    expect((await admin.listUsers(deps, member)).code).toBe('00017');
+    const listed = await admin.listUsers(deps, sys);
+    expect(listed.code).toBe('00098');
+    expect(listed.data.users.length).toBe(2);
+    expect((await admin.readLogs(deps, member)).code).toBe('00017');
+  });
+});

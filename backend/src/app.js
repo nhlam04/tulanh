@@ -15,7 +15,18 @@ const COLLECTIONS = [
 function buildDeps(store, extra = {}) {
   const repos = {};
   for (const name of COLLECTIONS) repos[name] = store.collection(name);
-  const deps = { repos, store, now: extra.now || (() => new Date()), message, sendEmail: extra.sendEmail, push: extra.push };
+  const deps = {
+    repos,
+    store,
+    services: require('./services'),
+    now: extra.now || (() => new Date()),
+    message,
+    sendEmail: extra.sendEmail,
+    push: extra.push,
+    emit: extra.emit || (() => {}),
+    pageLimit: config.pageLimit,
+    logRetentionDays: config.logRetentionDays,
+  };
   deps.nextError = errorHandler(deps);
   return deps;
 }

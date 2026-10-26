@@ -1,0 +1,6 @@
+{
+  "name": "ishop-shared",
+  "private": true,
+  "main": "rules.js",
+  "dependencies": { "zod": "4.6.7" }
+}

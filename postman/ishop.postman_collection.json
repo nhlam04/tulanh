@@ -1,0 +1,1326 @@
+{
+  "info": {
+    "name": "ishop-api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0",
+    "description": "Built from src/routes.js, so the collection and the server list the same paths. Codes come from shared/codes.json."
+  },
+  "item": [
+    {
+      "name": "post /auth/register",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/auth/register",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "auth",
+            "register"
+          ]
+        },
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /auth/code",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/auth/code",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "auth",
+            "code"
+          ]
+        },
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /auth/verify",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/auth/verify",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "auth",
+            "verify"
+          ]
+        },
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /auth/login",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/auth/login",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "auth",
+            "login"
+          ]
+        },
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /auth/refresh",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/auth/refresh",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "auth",
+            "refresh"
+          ]
+        },
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /auth/logout",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/auth/logout",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "auth",
+            "logout"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /user/profile",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/user/profile",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "user",
+            "profile"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "put /user/profile",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/user/profile",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "user",
+            "profile"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "put /user/password",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/user/password",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "user",
+            "password"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "delete /user",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/user",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "user"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /user/export",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/user/export",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "user",
+            "export"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "post /user/devices",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/user/devices",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "user",
+            "devices"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /user/devices",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/user/devices",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "user",
+            "devices"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "post /groups",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/groups",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "groups"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /groups/members",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/groups/members",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "groups",
+            "members"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "delete /groups/members",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/groups/members",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "groups",
+            "members"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /groups/members",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/groups/members",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "groups",
+            "members"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "post /groups/leave",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/groups/leave",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "groups",
+            "leave"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /categories",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/categories",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "categories"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /categories",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/categories",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "categories"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "post /units",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/units",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "units"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /units",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/units",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "units"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "post /foods",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/foods",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "foods"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /foods",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/foods",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "foods"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "get /foods/search",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/foods/search",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "foods",
+            "search"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "put /foods",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/foods",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "foods"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "delete /foods",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/foods",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "foods"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /fridge",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/fridge",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "fridge"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /fridge",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/fridge",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "fridge"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "get /fridge/byFood",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/fridge/byFood",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "fridge",
+            "byFood"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "put /fridge",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/fridge",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "fridge"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "delete /fridge",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/fridge",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "fridge"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /shopping/tasks",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/shopping/tasks",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "shopping",
+            "tasks"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /shopping/claim",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/shopping/claim",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "shopping",
+            "claim"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /shopping/bought",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/shopping/bought",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "shopping",
+            "bought"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /consumption",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/consumption",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "consumption"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /reports/purchases",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/reports/purchases",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "reports",
+            "purchases"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "get /reports/consumption",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/reports/consumption",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "reports",
+            "consumption"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "post /meal-plans",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/meal-plans",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "meal-plans"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /meal-plans",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/meal-plans",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "meal-plans"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "put /meal-plans",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/meal-plans",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "meal-plans"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "delete /meal-plans",
+      "request": {
+        "method": "DELETE",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/meal-plans",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "meal-plans"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /meal-plans/suggested",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/meal-plans/suggested",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "meal-plans",
+            "suggested"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "post /meal-plans/generate-list",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/meal-plans/generate-list",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "meal-plans",
+            "generate-list"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /recipes",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/recipes",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "recipes"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /recipes",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/recipes",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "recipes"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "put /recipes",
+      "request": {
+        "method": "PUT",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/recipes",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "recipes"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /recipes/ingredients",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/recipes/ingredients",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "recipes",
+            "ingredients"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /sync",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/sync",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "sync"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /admin/users",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/admin/users",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "admin",
+            "users"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    },
+    {
+      "name": "post /admin/users/role",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/admin/users/role",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "admin",
+            "users",
+            "role"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "post /admin/sessions/logout",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/admin/sessions/logout",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "admin",
+            "sessions",
+            "logout"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "event": []
+    },
+    {
+      "name": "get /admin/logs",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:5000/it4788/admin/logs",
+          "host": [
+            "http://127.0.0.1"
+          ],
+          "path": [
+            "admin",
+            "logs"
+          ]
+        },
+        "header": [
+          {
+            "key": "authorization",
+            "value": "Bearer {{token}}"
+          }
+        ]
+      },
+      "event": []
+    }
+  ]
+}

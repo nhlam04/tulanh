@@ -52,10 +52,12 @@ export default function RegisterScreen() {
         <Notice note={note} />
         <Field label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" placeholder="ví dụ: bạn@email.com" />
         <Field label="Mật khẩu" value={password} onChangeText={setPassword} secureTextEntry />
-        <Field label="Tên hiển thị" value={name} onChangeText={setName} placeholder="ví dụ: Hòa" />
+        {/* The example is a name long enough for the server rule, so the screen does not
+            invite the person to type something the server will refuse. */}
+        <Field label="Tên hiển thị" value={name} onChangeText={setName} placeholder="ví dụ: Hoa Nguyễn" />
         <Field label="Tên đăng nhập" value={username} onChangeText={setUsername} placeholder="ví dụ: hoa" />
         <Button label="Đăng ký" onPress={register} />
-        {sent ? <Field label="Mã xác nhận" value={code} onChangeText={setCode} keyboardType="number-pad" /> : null}
+        {sent ? <Field label="Mã xác nhận" value={code} onChangeText={setCode} keyboardType="number-pad" placeholder="6 chữ số trong email" /> : null}
         {sent ? <Button label="Xác nhận email" onPress={verify} outline /> : null}
         <Button label="Về đăng nhập" onPress={() => router.navigate('/')} outline />
       </Screen>

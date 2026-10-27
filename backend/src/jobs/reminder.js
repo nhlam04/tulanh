@@ -19,7 +19,9 @@ async function runReminder(deps, date = new Date()) {
       const row = await deps.repos.notification_log.insertOne({ ...key, group_id: group._id, code: '00346' });
       const devices = await deps.repos.user_devices.find({ user_id: lot.created_by });
       if (deps.push && devices.length) {
-        const out = await deps.push(devices, lot, group.timezone);
+        // The payload names the food, so the job reads the food row before the send (D36).
+        const food = await deps.repos.foods.findOne({ _id: lot.food_id });
+        const out = await deps.push(devices, lot, group.timezone, food, row.sent_date);
         // The send answer is a ticket. The ticket id is stored with the device, so the
         // receipt check later can name which device to stop using.
         for (const ticket of (out.data && out.data.tickets) || []) {

@@ -1,12 +1,13 @@
 {
-  "name": "ishop-backend",
+  "name": "tulanh-backend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "node --env-file-if-exists=.env src/server.js",
     "check:mail": "node --env-file-if-exists=.env scripts/check-mail.js",
     "test": "jest",
-    "test:integration": "node --test test/integration/integration.test.js"
+    "test:integration": "node --test test/integration/integration.test.js",
+    "seed": "node --env-file-if-exists=.env scripts/seed.js"
   },
   "dependencies": {
     "bcryptjs": "3.0.3",

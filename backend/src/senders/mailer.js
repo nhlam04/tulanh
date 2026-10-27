@@ -20,9 +20,9 @@ async function sendEmail(to, code, transport = buildTransport(require('nodemaile
   const message = codes[code] || codes['00048'];
   if (!transport) return { code: '00048', message, data: { delivered: false, mode: 'noop', to } };
   const info = await transport.sendMail({
-    from: process.env.SMTP_FROM || 'ishop@localhost',
+    from: process.env.SMTP_FROM || 'tulanh@localhost',
     to,
-    subject: 'ishop',
+    subject: 'tulanh',
     text: message,
   });
   return { code: '00048', message, data: { delivered: true, mode: 'smtp', to, id: info.messageId } };

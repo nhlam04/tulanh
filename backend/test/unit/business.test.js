@@ -4,6 +4,7 @@ const food = require('../../src/services/food');
 const fridge = require('../../src/services/fridge');
 const shopping = require('../../src/services/shopping');
 const consumption = require('../../src/services/consumption');
+const catalog = require('../../src/services/catalog');
 const report = require('../../src/services/report');
 const mealPlan = require('../../src/services/mealPlan');
 const recipe = require('../../src/services/recipe');
@@ -250,7 +251,7 @@ describe('the CRUD paths that the spec lists', () => {
   test('the send answer is a ticket, and a receipt that reads DeviceNotRegistered stops the token', async () => {
     const deps = seed();
     const push = require('../../src/senders/push');
-    deps.push = (devices, lot, timezone) => push.sendPush(devices, lot, timezone);
+    deps.push = (devices, lot, timezone, food, day) => push.sendPush(devices, lot, timezone, food, day);
     deps.receipts = (ids) => push.checkReceipts(ids);
     await deps.repos.groups.insertOne({ _id: 'g1', leader_id: 'u1', timezone: 'Asia/Ho_Chi_Minh' });
     await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'thit' });
@@ -262,12 +263,22 @@ describe('the CRUD paths that the spec lists', () => {
       { data: { ticket1: { status: 'error', details: { error: 'DeviceNotRegistered' } } } },
     ];
     const original = global.fetch;
-    global.fetch = async () => ({ json: async () => answers.shift() });
+    const requests = [];
+    global.fetch = async (url, init) => {
+      requests.push(JSON.parse(init.body));
+      return { json: async () => answers.shift() };
+    };
     const sent = await jobs.runReminder(deps, new Date('2026-10-26T00:00:00Z'));
     const checked = await jobs.runReceipts(deps);
     global.fetch = original;
 
     expect(sent.length).toBe(1);
+    // D36: the notice names the food and the days left, and no person or group.
+    const message = requests[0][0];
+    expect(message.title).toBe('Tủ lành của bạn');
+    expect(message.body).toBe('thit còn 2 ngày');
+    expect(message.data.screen).toBe('fridge');
+    expect(JSON.stringify(message)).not.toMatch(/u1|g1/);
     expect(checked[0].status).toBe('error');
     const row = await deps.repos.notification_log.findOne({ ticket_id: 'ticket1' });
     expect(row.receipt_error).toBe('DeviceNotRegistered');
@@ -275,5 +286,40 @@ describe('the CRUD paths that the spec lists', () => {
     expect(stopped.unregistered_at).not.toBeNull();
     const again = await push.sendPush([stopped], { _id: 'lot1', use_until: '2026-10-28' }, 'Asia/Ho_Chi_Minh');
     expect(again.data.skipped).toBe(true);
+  });
+});
+
+describe('catalog access (D41)', () => {
+  test('every path under /admin/ answers the admin-level message to a member', async () => {
+    const deps = seed({ categories: [{ _id: 'c1', name: 'rau' }], units: [{ _id: 'n1', name: 'kg' }] });
+    const member = { userId: 'u1', role: 'user', groupId: 'g1', input: { name: 'rau' } };
+    expect((await catalog.createCategory(deps, member)).code).toBe('00017');
+    expect((await catalog.listCategoriesForAdmin(deps, member)).code).toBe('00017');
+    const leader = { userId: 'u1', role: 'group_leader', groupId: 'g1', input: { unitName: 'kg' } };
+    expect((await catalog.listUnitsForAdmin(deps, leader)).code).toBe('00017');
+    expect((await catalog.deleteUnit(deps, leader)).code).toBe('00017');
+    expect(await deps.repos.categories.count({})).toBe(1);
+  });
+
+  test('the reads the food form needs stay open to a member', async () => {
+    const deps = seed({ categories: [{ _id: 'c1', name: 'rau' }], units: [{ _id: 'n1', name: 'kg' }] });
+    const member = { userId: 'u1', role: 'user', groupId: 'g1', input: {} };
+    expect((await catalog.listCategories(deps, member)).code).toBe('00129');
+    expect((await catalog.listUnits(deps, member)).code).toBe('00110');
+    const admin = { userId: 'u9', role: 'admin', groupId: null, input: {} };
+    expect((await catalog.listCategoriesForAdmin(deps, admin)).code).toBe('00129');
+    expect((await catalog.listUnitsForAdmin(deps, admin)).code).toBe('00110');
+  });
+
+  test('a catalog row a food still uses cannot be deleted', async () => {
+    const deps = seed({ categories: [{ _id: 'c1', name: 'rau' }], units: [{ _id: 'n1', name: 'kg' }] });
+    await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'tao', category_id: 'c1', unit_id: 'n1' });
+    const admin = { userId: 'u9', role: 'admin', groupId: null, input: { name: 'rau' } };
+    expect((await catalog.deleteCategory(deps, admin)).code).toBe('00144');
+    const unitAdmin = { userId: 'u9', role: 'admin', groupId: null, input: { unitName: 'kg' } };
+    expect((await catalog.deleteUnit(deps, unitAdmin)).code).toBe('00126');
+    await deps.repos.foods.deleteOne({ _id: 'f1' });
+    expect((await catalog.deleteCategory(deps, admin)).code).toBe('00146');
+    expect((await catalog.deleteUnit(deps, unitAdmin)).code).toBe('00128');
   });
 });

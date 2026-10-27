@@ -2,6 +2,7 @@ const express = require('express');
 const { envelope } = require('./envelope');
 const { rateLimit, authenticate, attachGroup, errorHandler } = require('./middleware/core');
 const { logWrite } = require('./services/logs');
+const { uploadImage } = require('./middleware/upload');
 
 const services = require('./services');
 
@@ -87,7 +88,7 @@ function handle(deps, method, path, serviceName, write, needsAuth) {
   return async function handler(req, res) {
     req.ctx = req.ctx || {};
     // Path params join the input, so a path such as /fridge/:foodName/ reaches the service.
-    req.ctx.input = { ...req.body, ...(req.query || {}), ...(req.params || {}) };
+    req.ctx.input = { ...req.body, ...(req.query || {}), ...(req.params || {}), ...(req.fileMeta || {}) };
     let result = null;
     try {
       result = await service(deps, req.ctx);
@@ -110,7 +111,10 @@ function buildRouter(deps) {
   for (const [method, path, service, write, needsAuth] of routes) {
     const chain = [needsAuth ? authenticate : (req, res, next) => next()];
     if (needsAuth) chain.push(attachGroup(deps));
-    router[method](path, chain[0], chain[1] || ((req, res, next) => next()), handle(deps, method, path, service, write, needsAuth));
+    // Multipart needs a parser before the service runs, so the upload route carries the file
+    // handler in its own chain.
+    if (method === 'post' && path === '/uploads/') chain.push(uploadImage);
+    router[method](path, ...chain, handle(deps, method, path, service, write, needsAuth));
   }
   router.use(errorHandler(deps));
   return router;

@@ -1,0 +1,14 @@
+{
+  "name": "ishop",
+  "slug": "ishop",
+  "scheme": "ishop",
+  "version": "1.0.0",
+  "orientation": "portrait",
+  "userInterfaceStyle": "light",
+  "plugins": ["expo-notifications", "expo-sqlite"],
+  "extra": {
+    "eas": {
+      "projectId": ""
+    }
+  }
+}

@@ -18,7 +18,7 @@ let store;
 
 nodeTest.before(async () => {
   mongod = await MongoMemoryReplSet.create({ replSet: { count: 1, storageEngine: 'wiredTiger' } });
-  process.env.DB_NAME = 'ishop_test';
+  process.env.DB_NAME = 'tulanh_test';
   store = await connect(mongod.getUri());
   await createIndexes(store.db);
 });
@@ -40,6 +40,21 @@ nodeTest.test('a cross-collection write runs in a transaction (D21)', async () =
   assert.equal(result.code, '00390');
   const lot = await deps.repos.fridge_lots.findOne({ _id: result.data.lot._id });
   assert.equal(lot.quantity, 2);
+});
+
+nodeTest.test('a row written with an id string is found by that id on a real database (store id shape)', async () => {
+  // A service keeps ids as strings, and the store maps a 24-character id to an ObjectId in
+  // both directions. The daily job reads lots by group id and devices by user id, so a write
+  // and the next read have to agree. The fake store cannot show this: it keeps strings as-is.
+  const deps = buildDeps(store, { now: () => new Date() });
+  const user = await deps.repos.users.insertOne({ email: 'idshape@mail.com', name: 'Id Shape' });
+  const group = await deps.repos.groups.insertOne({ name: 'g-id', leader_id: user._id, timezone: 'Asia/Ho_Chi_Minh' });
+  const item = await deps.repos.foods.insertOne({ group_id: group._id, name: 'dau', category_id: 'c1', unit_id: 'n1', created_by: user._id });
+  await deps.repos.fridge_lots.insertOne({ group_id: group._id, food_id: item._id, quantity: 1, use_until: '2026-10-28', created_by: user._id });
+  const device = await deps.repos.user_devices.insertOne({ user_id: user._id, device_id: 'ps-vita-2', push_token: 'ExponentPushToken[x]' });
+  assert.equal((await deps.repos.fridge_lots.find({ group_id: group._id })).length, 1);
+  assert.equal((await deps.repos.user_devices.find({ user_id: user._id }))[0].device_id, 'ps-vita-2');
+  assert.equal((await deps.repos.user_devices.findOne({ _id: device._id })).user_id, user._id);
 });
 
 nodeTest.test('a unique index answers with the code that the name rule uses (D19)', async () => {

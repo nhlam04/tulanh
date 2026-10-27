@@ -51,16 +51,27 @@ async function sendCode(deps, ctx) {
   return { code: '00048', data: { email: user.email } };
 }
 
+// Verify rule (D25, closed here): the code belongs to an account, so the request names
+// that account with the email the code was sent to. The user id is read from the row the
+// email finds, never from the body — a body id would let any caller mark any account as
+// verified. The route carries no token on purpose (D40): login refuses an unverified
+// account, so there is no session to bind yet, and the loop has to close without one.
+// An email with no account answers the same code as a wrong code, so this route is not a
+// list of which emails are registered.
 async function verifyCode(deps, ctx) {
   const input = ctx.input;
+  if (!input.email) return { code: '00005' };
   if (!input.code) return { code: '00053' };
-  const row = await deps.repos.verification_codes.findOne({ user_id: input.userId, code: input.code, used_at: null });
+  const user = await deps.repos.users.findOne({ email: input.email });
+  if (!user) return { code: '00054' };
+  const row = await deps.repos.verification_codes.findOne({ user_id: user._id, code: input.code, used_at: null });
   if (!row) return { code: '00054' };
   if (row.expires_at && new Date(row.expires_at) < deps.now()) return { code: '00062' };
   await deps.repos.verification_codes.updateOne({ _id: row._id }, { used_at: deps.now() });
-  const user = await deps.repos.users.updateOne({ _id: input.userId }, { is_verified: true });
-  if (!user) return { code: '00009' };
-  return { code: '00058', data: { user: publicUser(user) } };
+  if (user.is_verified) return { code: '00058', data: { user: publicUser(user) } };
+  const updated = await deps.repos.users.updateOne({ _id: user._id }, { is_verified: true });
+  if (!updated) return { code: '00009' };
+  return { code: '00058', data: { user: publicUser(updated) } };
 }
 
 async function login(deps, ctx) {

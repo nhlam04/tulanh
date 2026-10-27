@@ -3,9 +3,15 @@
 const DENY_GROUP = '00196';
 const DENY_LEADER = '00258';
 const DENY_OWNER = '00167x';
+// One message for the level above every group rule (D28): the system admin level.
+const DENY_ADMIN = '00017';
 
 function inGroup(ctx, groupId) {
   return ctx.role === 'admin' || String(ctx.groupId) === String(groupId);
+}
+
+function adminOnly(ctx) {
+  return ctx.role === 'admin';
 }
 
 function canWrite(row, ctx) {
@@ -19,4 +25,4 @@ function leaderOnly(ctx) {
   return ctx.role === 'admin' || ctx.role === 'group_leader';
 }
 
-module.exports = { inGroup, canWrite, leaderOnly, DENY_GROUP, DENY_LEADER, DENY_OWNER };
+module.exports = { inGroup, canWrite, leaderOnly, adminOnly, DENY_GROUP, DENY_LEADER, DENY_OWNER, DENY_ADMIN };

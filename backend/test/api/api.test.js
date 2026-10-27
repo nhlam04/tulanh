@@ -58,6 +58,45 @@ describe('http layer', () => {
     expect((await noToken.json()).code).toBe('00006');
   });
 
+  test('the verification loop closes with no session and only for the account the email names (D40)', async () => {
+    const registered = await post('/user/', {
+      email: 'loop@mail.com', password: 'password1', name: 'Loop User', username: 'loopuser',
+    });
+    expect(registered.body.code).toBe('00035');
+
+    const sent = await post('/user/send-verification-code/', { email: 'loop@mail.com' });
+    expect(sent.body.code).toBe('00048');
+    const code = (await deps.store.collection('verification_codes').findOne({ user_id: registered.body.data.user.id })).code;
+
+    expect((await post('/user/verify-email/', { email: 'loop@mail.com', code: '000000' })).body.code).toBe('00054');
+    // An email with no account answers the same code, so this path is not a list of accounts.
+    expect((await post('/user/verify-email/', { email: 'nobody@mail.com', code })).body.code).toBe('00054');
+    // A body user id is not read, so it cannot mark another account verified.
+    expect((await post('/user/verify-email/', { userId: registered.body.data.user.id, code })).body.code).toBe('00005');
+
+    expect((await post('/user/verify-email/', { email: 'loop@mail.com', code })).body.code).toBe('00058');
+    expect((await post('/user/login/', { email: 'loop@mail.com', password: 'password1' })).body.code).toBe('00047');
+  });
+
+  test('the admin catalog path answers the admin-level message over http, and the food form read does not (D41)', async () => {
+    await post('/user/', { email: 'cat@mail.com', password: 'password1', name: 'Cat User', username: 'catuser' });
+    const row = await deps.store.collection('users').findOne({ email: 'cat@mail.com' });
+    row.is_verified = true;
+    const token = (await post('/user/login/', { email: 'cat@mail.com', password: 'password1' })).body.data.accessToken;
+
+    const denied = await fetch(`${base}/admin/category/`, {
+      method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+      body: JSON.stringify({ name: 'rau' }),
+    });
+    expect((await denied.json()).code).toBe('00017');
+    expect((await (await fetch(`${base}/admin/category/`, { headers: { authorization: `Bearer ${token}` } })).json()).code).toBe('00017');
+
+    const open = await fetch(`${base}/food/category/`, { headers: { authorization: `Bearer ${token}` } });
+    expect((await open.json()).code).toBe('00129');
+    const unit = await fetch(`${base}/food/unit/`, { headers: { authorization: `Bearer ${token}` } });
+    expect((await unit.json()).code).toBe('00110');
+  });
+
   test('the rate limit reads 60 per minute per ip (D11)', async () => {
     // The window is a calendar minute, so a run that crosses the boundary can land 60 requests in
     // each window and read no limit. The test sends until the limit answers, with a cap that a

@@ -24,6 +24,26 @@ function toFilter(filter) {
   return out;
 }
 
+// Fields that hold another row's id. A caller's device id, an Expo ticket and an idempotency
+// request id are not row ids, so they are absent here and keep the string the caller sent.
+const ID_KEYS = new Set([
+  '_id', 'group_id', 'user_id', 'food_id', 'unit_id', 'category_id', 'recipe_id',
+  'ingredient_id', 'lot_id', 'list_id', 'task_id', 'event_id', 'plan_id',
+  'leader_id', 'created_by', 'updated_by', 'claimed_by',
+]);
+
+// Write rule that matches the read rule: a 24-character id string becomes an ObjectId on the
+// way in too, so a row a service writes is found by the next query. Without this, a service
+// writes group_id as a string and find({ group_id }) reads it back as an ObjectId and matches
+// nothing. The fake store keeps plain strings, so this rule only shows on a real database.
+function toDoc(doc) {
+  const out = { ...doc };
+  for (const [key, value] of Object.entries(out)) {
+    if (ID_KEYS.has(key) && typeof value === 'string' && HEX.test(value)) out[key] = new ObjectId(value);
+  }
+  return out;
+}
+
 // One id shape for the services: every id reads as a string.
 function asString(doc) {
   if (!doc) return null;
@@ -48,11 +68,11 @@ function buildStore(db, session = null) {
         return (await cursor.limit(options.limit || config.pageLimit).toArray()).map(asString);
       },
       async insertOne(doc) {
-        const result = await col.insertOne({ ...doc }, { session });
+        const result = await col.insertOne(toDoc(doc), { session });
         return asString({ ...doc, _id: result.insertedId });
       },
       async updateOne(filter, patch) {
-        const result = await col.updateOne(toFilter(filter), { $set: patch }, { session });
+        const result = await col.updateOne(toFilter(filter), { $set: toDoc(patch) }, { session });
         if (result.modifiedCount === 0) return null;
         return asString(await col.findOne(toFilter(filter), { session }));
       },

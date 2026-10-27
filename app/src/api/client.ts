@@ -37,6 +37,15 @@ export function notice(out: { code: string; message?: string; status?: number })
   return { text, bad };
 }
 
+
+// A call that worked is shown as the screen's state, not as a message: the list, the count and
+// the queue line already say it. Only a call that failed gets a line (rule 8, one job per
+// screen). It also keeps the app out of the spec table's generic wording, which says
+// "tủ lạnh"; the app's copy is about tủ lành.
+export function failure(out: { code: string; message?: string; status?: number }): Note {
+  const n = notice(out);
+  return n.bad ? n : { text: '', bad: false };
+}
 export type RequestOptions = {
   method?: 'get' | 'post' | 'put' | 'delete';
   body?: unknown;

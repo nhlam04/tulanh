@@ -46,8 +46,9 @@ async function sendCode(deps, ctx) {
     expires_at: new Date(Date.now() + config.codeTtlMs),
     used_at: null,
   });
-  // Delivery is the provider's job. The code and the receiver go out; nothing else.
-  if (deps.sendEmail) await deps.sendEmail(user.email, code);
+  // Delivery is the provider's job. The code and the receiver go out; nothing else. The
+  // lifetime travels with it, so the mail says the same span the database will enforce.
+  if (deps.sendEmail) await deps.sendEmail(user.email, code, undefined, { ttlMs: config.codeTtlMs });
   return { code: '00048', data: { email: user.email } };
 }
 

@@ -73,12 +73,18 @@ describe('sync queue and admin levels', () => {
   test('the mailer runs in noop mode with no host, and sends when a transport is given', async () => {
     const deps = seed();
     const mailer = require('../../src/senders/mailer');
-    const noop = await mailer.sendEmail('a@mail.com', '00048');
+    const noop = await mailer.sendEmail('a@mail.com', '654321');
     expect(noop.code).toBe('00048');
     expect(noop.data.mode).toBe('noop');
-    const fake = { sendMail: async () => ({ messageId: 'm1' }) };
-    const sent = await mailer.sendEmail('a@mail.com', '00048', fake);
+    let mail = null;
+    const fake = { sendMail: async (message) => { mail = message; return { messageId: 'm1' }; } };
+    const sent = await mailer.sendEmail('a@mail.com', '654321', fake, { ttlMs: 24 * 60 * 60 * 1000 });
     expect(sent.data.delivered).toBe(true);
+    // The person reads the code out of the mail, so the body carries it and the span the
+    // database will enforce, not the api sentence.
+    expect(mail.text).toContain('654321');
+    expect(mail.text).toContain('Mã hết hạn sau 24 giờ.');
+    expect(mail.subject).toBe('Mã xác nhận Tủ Lành');
     expect(mailer.buildTransport({ createTransport: (options) => options }, { SMTP_HOST: '127.0.0.1', SMTP_PORT: '1025' }))
       .toEqual({ host: '127.0.0.1', port: 1025, secure: false, auth: undefined });
     expect(mailer.buildTransport({ createTransport: () => 'x' }, {})).toBeNull();

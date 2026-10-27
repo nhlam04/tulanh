@@ -1,34 +1,35 @@
-// Push route (Hùng): the Route A proof kept as a screen. It asks for permission, reads the
+// Push route (Hung): the Route A proof kept as a screen. It asks for permission, reads the
 // Expo push token, posts the device so the server can notify this phone, and lists every
-// notice that arrives. A proof surface, so it is reached from Thống kê, not from the tabs.
+// notice that arrives. The token stays off the screen: what a person reads here is whether
+// this phone is listening, not the string that makes it listen (rule 9).
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
-import { notice, request, type Note } from '../src/api/client';
+import { failure, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { deviceId } from '../src/features/deviceId';
 import { registerPushToken, renderNotification } from '../src/features/push';
-import { Bar, Button, List, ListRow, Notice, Screen, styles } from '../src/features/ui';
+import { Bar, Button, Empty, List, ListRow, Notice, Screen, styles } from '../src/features/ui';
 
 export default function PushRoute() {
   const session = useSession();
   const [note, setNote] = useState<Note>({ text: 'đang mở tủ lành…', bad: false });
-  const [token, setToken] = useState('—');
+  const [listening, setListening] = useState(false);
   const [notices, setNotices] = useState<string[]>([]);
 
   async function readToken() {
     await Notifications.requestPermissionsAsync();
     const result = await registerPushToken();
-    setNote(result.token ? { text: 'tủ lành của bạn đã mở', bad: false } : { text: result.message || 'chưa mở được thông báo', bad: true });
-    setToken(result.token ? String(result.token) : '—');
+    setListening(Boolean(result.token));
+    setNote(result.token ? { text: '', bad: false } : { text: result.message || 'chưa mở được thông báo', bad: true });
     if (!result.token || !session.token) return;
     const device = await request('/user/devices/', {
       method: 'post',
       body: { deviceId: await deviceId(), platform: 'android', pushToken: String(result.token) },
       token: session.token,
     });
-    setNote(notice(device));
+    setNote(failure(device));
   }
 
   useEffect(() => {
@@ -45,11 +46,19 @@ export default function PushRoute() {
       <Bar title="Thông báo" sub="đường dây nhắc hết hạn" />
       <Screen>
         <Notice note={note} />
-        <ListRow title="Token của máy" sub={token} />
+        <List>
+          <ListRow
+            title={listening ? 'Máy này đang chờ nhắc từ tủ' : 'Máy này chưa chờ được nhắc'}
+            sub={listening ? 'nhắc khi một phần gần hết hạn' : 'thử lại, hoặc bật thông báo trong Cài đặt'}
+            warn={!listening}
+          />
+        </List>
         {notices.length ? (
           <List>{notices.map((line, index) => <ListRow key={index} title={line} />)}</List>
-        ) : null}
-        <Button label="Đọc lại token" onPress={readToken} />
+        ) : (
+          <Empty title="Chưa có nhắc nào" hint="Tủ sẽ nhắc khi một phần gần hết hạn." />
+        )}
+        <Button label="Ghi nhận máy lại" onPress={readToken} />
         <Button label="Về thống kê" onPress={() => router.push('/stats')} outline />
       </Screen>
     </View>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { notice, request, type Note } from '../src/api/client';
+import { failure, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { pendingOps } from '../src/offline/queue';
 import { sendQueue } from '../src/offline/send';
@@ -27,7 +27,7 @@ export default function FridgeRoute() {
     setFoodNames(namesOf(foods, 'foods'));
     setUnitNames(namesOf(units, 'units'));
     setLots((fridge.data as { lots: Record<string, unknown>[] })?.lots || []);
-    setNote(notice(fridge));
+    setNote(failure(fridge));
   }
 
   useEffect(() => {
@@ -35,17 +35,24 @@ export default function FridgeRoute() {
   }, [session.token, session.base]);
 
   async function useOne(lotId: string) {
-    const out = await writeOrQueue(session, '/consumption/', { lotId, quantity: 1, reason: 'cook' }, {
-      type: 'consumption', payload: { lotId, quantity: 1, reason: 'cook' },
+    const out = await writeOrQueue(session, '/consumption/', { lotId, quantity: 1, reason: 'nấu ăn' }, {
+      type: 'consumption', payload: { lotId, quantity: 1, reason: 'nấu ăn' },
     });
-    setNote(out.queued ? { text: 'Đã xếp vào hàng đợi để gửi sau', bad: false } : notice(out));
+    setNote(out.queued ? { text: 'Đã xếp vào hàng đợi để gửi sau', bad: false } : failure(out));
     if (out.code === '00387') reload();
   }
 
   async function flush() {
     const out = await sendQueue(session.db, session.token, new Date().toISOString());
-    setNote({ text: out.sent ? `Đã gửi ${out.sent} lượt viết` : 'Hàng đợi chưa có gì để gửi', bad: false });
-    reload();
+    // The list is read first, then the sentence goes on top: reload clears the note, so a
+    // sentence set before it would be erased before the person could read it.
+    await reload();
+    // A refused write stays in the queue and says why; only a sent one reads as done.
+    setNote(
+      out.failed.length
+        ? failure(out.failed[0])
+        : { text: out.sent ? `Đã gửi ${out.sent} lượt viết` : 'Hàng đợi chưa có gì để gửi', bad: false },
+    );
   }
 
   const queued = pendingOps(session.db).length;

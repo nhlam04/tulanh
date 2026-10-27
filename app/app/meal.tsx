@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { notice, request, type Note } from '../src/api/client';
+import { failure, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { MealScreen, loadMeals, namesOf } from '../src/features/screens';
 import { Bar, Button, Field, Notice, Screen, TabBar, styles } from '../src/features/ui';
@@ -20,7 +20,7 @@ export default function MealRoute() {
       loadMeals({ token: session.token, offline: false, dispatch: (rows) => setMeals(rows as Record<string, unknown>[]) }),
     ]);
     setNames(namesOf(foods, 'foods'));
-    setNote(notice(out));
+    setNote(failure(out));
   }
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function MealRoute() {
       return;
     }
     const out = await request('/meal/generate-list/', { method: 'post', body: { date }, token: session.token });
-    setNote(notice(out));
+    setNote(failure(out));
     if (out.code === '00393') router.push('/shopping');
   }
 

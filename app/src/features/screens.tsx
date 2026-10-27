@@ -17,6 +17,19 @@ export function namesOf(out: { data: unknown | null }, key: string): NameMap {
   return Object.fromEntries(rows.map((row) => [String(row._id), String(row.name)]));
 }
 
+// Member rows come back with `id` and `username`, so a claimed row can name the person
+// instead of printing the row id (rule 9: an id on screen is code, not language).
+export function peopleOf(out: { data: unknown | null }): NameMap {
+  const rows = (out.data as { members?: Record<string, unknown>[] } | null)?.members || [];
+  return Object.fromEntries(rows.map((row) => [String(row.id), String(row.username || row.name || '')]));
+}
+
+export async function loadMembers(props: ScreenProps) {
+  const response = await request('/user/group/', { token: props.token, offline: props.offline });
+  props.dispatch((response.data as { members?: unknown[] } | null)?.members || []);
+  return response;
+}
+
 export async function loadFoods(props: ScreenProps) {
   const response = await request('/food/', { token: props.token, offline: props.offline });
   props.dispatch((response.data as { foods: unknown[] })?.foods || []);
@@ -99,16 +112,19 @@ export function FridgeScreen({ items, names, units, onUse }: { items: Record<str
     <List>
       {items.map((lot) => {
         const left = daysLeft(String(lot.use_until || ''));
+        const empty = Number(lot.quantity) <= 0;
         const due = left === null ? 'chưa rõ ngày dùng' : left <= 0 ? 'hết hạn hôm nay' : `còn ${left} ngày`;
         return (
           <ListRow
             key={String(lot._id)}
             title={names[String(lot.food_id)] || 'món trong tủ'}
-            sub={`${String(lot.quantity)} ${units[String(lot.unit_id)] || ''} · ${due}`}
-            warn={left !== null && left <= 0}
-            action={onUse ? 'Đã dùng' : undefined}
-            onPress={onUse ? () => onUse(String(lot._id)) : undefined}
-            disabled={!onUse}
+            // An empty part states it is empty and offers nothing: the tap that would ask
+            // the server for more of it is not there to make (rule 5).
+            sub={empty ? 'đã dùng hết' : `${String(lot.quantity)} ${units[String(lot.unit_id)] || ''} · ${due}`}
+            warn={empty || (left !== null && left <= 0)}
+            action={onUse && !empty ? 'Đã dùng' : undefined}
+            onPress={onUse && !empty ? () => onUse(String(lot._id)) : undefined}
+            disabled={!onUse || empty}
           />
         );
       })}
@@ -119,7 +135,7 @@ export function FridgeScreen({ items, names, units, onUse }: { items: Record<str
 // Rule C in the client: the edit control only appears on a row the caller may write.
 // The row offers one action at a time — take the task, or mark it bought — never two side
 // by side, so a tap cannot land on the wrong one.
-export function ShoppingScreen({ items, names, userId, role, onClaim, onBought }: { items: Record<string, unknown>[]; names: NameMap; userId: string; role: string; onClaim?: (taskId: string) => void; onBought?: (taskId: string) => void }) {
+export function ShoppingScreen({ items, names, people, userId, onClaim, onBought }: { items: Record<string, unknown>[]; names: NameMap; people: NameMap; userId: string; onClaim?: (taskId: string) => void; onBought?: (taskId: string) => void }) {
   if (!items.length) {
     return <Empty title="Chưa có món nào trong danh sách" hint="Thêm món vào danh sách hiện có, hoặc tạo danh sách mới." />;
   }
@@ -129,14 +145,25 @@ export function ShoppingScreen({ items, names, userId, role, onClaim, onBought }
         const claimed = task.claimed_by ? String(task.claimed_by) : '';
         const bought = task.bought_at ? String(task.bought_at) : '';
         const mine = claimed === userId;
+        const taken = Boolean(claimed) && !mine;
+        const assignee = task.assign_to ? String(task.assign_to) : '';
         return (
           <ListRow
             key={String(task._id)}
             title={names[String(task.food_id)] || 'món trong danh sách'}
-            sub={bought ? 'đã mua' : claimed ? `đã nhận: ${claimed}` : `Số lượng ${String(task.quantity)} · chưa ai nhận`}
-            action={bought ? undefined : mine || !claimed ? 'Đã mua' : 'Nhận phần này'}
-            onPress={bought ? undefined : mine || !claimed ? (onBought ? () => onBought(String(task._id)) : undefined) : (onClaim ? () => onClaim(String(task._id)) : undefined)}
-            disabled={bought ? true : !(bought || mine || !claimed) ? true : !canEdit(task, userId, role)}
+            sub={
+              bought
+                ? 'đã mua'
+                : claimed
+                  ? `đã nhận: ${people[claimed] || 'một người trong nhóm'}`
+                  : `Số lượng ${String(task.quantity)}${assignee ? ` · phần của ${assignee}` : ' · chưa ai nhận'}`
+            }
+            // One action per row, and the same rule the server applies (rule 3 and 8): nobody
+            // has taken the part, so any member can take it; I took it, so I mark it bought;
+            // someone else took it, so this row waits for that person.
+            action={bought || taken ? undefined : mine ? 'Đã mua' : 'Nhận phần này'}
+            onPress={bought || taken ? undefined : mine ? (onBought ? () => onBought(String(task._id)) : undefined) : (onClaim ? () => onClaim(String(task._id)) : undefined)}
+            disabled={Boolean(bought) || taken}
           />
         );
       })}
@@ -164,14 +191,29 @@ export function MealScreen({ items, names }: { items: Record<string, unknown>[];
 
 export type ReportGroup = { name: string; rows: unknown[] };
 
+// Older rows still carry the reason word the app sent before the screen spoke Vietnamese,
+// so the read side translates the known keys and passes a category name through untouched.
+const REASON_LABELS: Record<string, string> = {
+  cook: 'nấu ăn',
+  spoil: 'hỏng',
+  other: 'lý do khác',
+};
+
 export function ReportScreen({ groups, label }: { groups: ReportGroup[]; label: string }) {
   if (!groups.length) {
     return <Empty title={`${label}: chưa có số liệu`} hint="Số liệu đến từ các lượt mua và các lượt dùng đã ghi." />;
   }
+  // Two stored keys can read as the same words, so the counts join before the row is drawn:
+  // one name on screen is one line, never two lines that look alike.
+  const counts = new Map<string, number>();
+  groups.forEach((group) => {
+    const name = REASON_LABELS[group.name] || group.name;
+    counts.set(name, (counts.get(name) || 0) + group.rows.length);
+  });
   return (
     <List>
-      {groups.map((group) => (
-        <ListRow key={group.name} title={group.name} sub={`${group.rows.length} lượt`} />
+      {[...counts.entries()].map(([name, count]) => (
+        <ListRow key={name} title={name} sub={`${count} lượt`} />
       ))}
     </List>
   );

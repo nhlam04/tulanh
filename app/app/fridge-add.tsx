@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { notice, request, type Note } from '../src/api/client';
+import { failure, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { namesOf } from '../src/features/screens';
 import { Bar, Button, ChipGroup, Field, Notice, Screen, styles } from '../src/features/ui';
@@ -39,7 +39,7 @@ export default function FridgeAddRoute() {
       return;
     }
     const out = await request('/fridge/', { method: 'post', body: { foodId, quantity: count, useUntil }, token: session.token });
-    setNote(notice(out));
+    setNote(failure(out));
     if (out.code === '00202') router.push('/fridge');
   }
 

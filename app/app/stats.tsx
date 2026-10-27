@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { notice, type Note } from '../src/api/client';
+import { failure, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { ReportScreen, loadConsumption, loadStats, type ReportGroup } from '../src/features/screens';
 import { Bar, Button, Notice, Screen, TabBar, styles } from '../src/features/ui';
@@ -20,7 +20,7 @@ export default function StatsRoute() {
       loadConsumption({ token: session.token, offline: false, dispatch: (rows) => setUsed(rows as ReportGroup[]) }),
     ]);
     const failed = [purchases, consumption].find((out) => out.status === 0 || out.status >= 400);
-    setNote(notice(failed || purchases));
+    setNote(failure(failed || purchases));
   }
 
   useEffect(() => {
@@ -36,6 +36,16 @@ export default function StatsRoute() {
         <ReportScreen groups={used} label="Đã dùng" />
         <Button label="Đọc lại" onPress={reload} outline />
         <Button label="Thông báo" onPress={() => router.push('/push')} outline />
+        {/* One way out of the account, on the screen that holds the group's numbers rather
+            than on the tủ you use every day (rule 2: the person can leave at will). */}
+        <Button
+          label="Thoát đăng nhập"
+          onPress={async () => {
+            await session.signOut();
+            router.replace('/');
+          }}
+          outline
+        />
       </Screen>
       <TabBar current="/stats" go={(path) => router.push(path)} />
     </View>

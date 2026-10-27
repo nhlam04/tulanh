@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { notice, request, type Note } from '../src/api/client';
+import { failure, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { FoodScreen, loadFoods, namesOf, searchFoods } from '../src/features/screens';
 import { Bar, Button, Empty, Field, Notice, Screen, TabBar, styles } from '../src/features/ui';
@@ -24,7 +24,7 @@ export default function FoodRoute() {
     ]);
     setCategories(namesOf(cats, 'categories'));
     setUnits(namesOf(un, 'units'));
-    setNote(notice(foodsOut));
+    setNote(failure(foodsOut));
   }
 
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function FoodRoute() {
 
   async function search() {
     const out = await searchFoods({ token: session.token, offline: false, dispatch: (rows) => setFoods(rows as Record<string, unknown>[]) }, keyword);
-    setNote(notice(out));
+    setNote(failure(out));
   }
 
   const noGroup = Boolean(session.token) && !session.user?.group_id;

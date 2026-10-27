@@ -3,7 +3,7 @@
 // name the server would refuse.
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { notice, request, type Note } from '../src/api/client';
+import { failure, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { namesOf } from '../src/features/screens';
 import { Bar, Button, ChipGroup, Field, Notice, Screen } from '../src/features/ui';
@@ -38,7 +38,7 @@ export default function FoodAddRoute() {
       body: { name, categoryName: categories[categoryId] || '', unitName: units[unitId] || '' },
       token: session.token,
     });
-    setNote(notice(out));
+    setNote(failure(out));
     if (out.code === '00160') router.push('/food');
   }
 

@@ -99,7 +99,7 @@ export function Button({ label, onPress, disabled, outline }: { label: string; o
   );
 }
 
-export function Field({ label, value, onChangeText, keyboardType, placeholder }: { label: string; value: string; onChangeText: (next: string) => void; keyboardType?: 'default' | 'number-pad'; placeholder?: string }) {
+export function Field({ label, value, onChangeText, keyboardType, placeholder, secureTextEntry }: { label: string; value: string; onChangeText: (next: string) => void; keyboardType?: 'default' | 'number-pad' | 'email-address'; placeholder?: string; secureTextEntry?: boolean }) {
   return (
     <View>
       <Text style={styles.fieldLabel}>{label}</Text>
@@ -111,6 +111,7 @@ export function Field({ label, value, onChangeText, keyboardType, placeholder }:
         placeholder={placeholder}
         placeholderTextColor={quiet}
         autoCapitalize="none"
+        secureTextEntry={secureTextEntry}
       />
     </View>
   );

@@ -5,6 +5,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { routes } = require('../backend/src/routes');
 
+// The host is written plainly, not as a variable. Checked on 2026-10-27 with newman 6.2.3: a
+// variable in the host position is not resolved — the request went to a host named {{base}} —
+// while a variable inside the path resolves. So the url keeps the host and the port, and the
+// base path is the part that changes in the Postman GUI when the server runs elsewhere.
 const BASE = 'http://127.0.0.1:5000/it4788';
 const DEMO = { email: 'demo@mail.com', password: 'password1', name: 'Demo User', username: 'demo' };
 
@@ -16,8 +20,8 @@ function envelopeTest(code) {
   return [
     `pm.test('the response reads the envelope shape', () => {`,
     `  const body = pm.response.json();`,
-    `  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);`,
-    code ? `  pm.expect(body.code).toBe('${code}');` : '',
+    `  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');`,
+    code ? `  pm.expect(body.code).to.equal('${code}');` : '',
     `});`,
   ].filter(Boolean);
 }
@@ -29,8 +33,8 @@ function requestFor(method, routePath, fromSpec) {
     name: `${method.toUpperCase()} ${routePath}${fromSpec ? '' : ' (not in the spec table)'}`,
     request: {
       method: method.toUpperCase(),
-      url: { raw: `${BASE}${routePath}`, protocol: 'http', host: ['127.0.0.1'], path: routePath.split('/').filter(Boolean) },
-      header: [{ key: 'authorization', value: '{{token}}' }],
+      url: `${BASE}${routePath}`,
+      header: [{ key: 'content-type', value: 'application/json' }, { key: 'authorization', value: '{{token}}' }],
       body: ['post', 'put', 'delete'].includes(method) ? { mode: 'raw', raw: '{}' } : undefined,
     },
     event: [event('test', envelopeTest().join('\n'))],
@@ -45,7 +49,8 @@ function authRequest(name, body, code) {
     name: name,
     request: {
       method: 'POST',
-      url: { raw: `${BASE}${name.split(' ')[1]}`, protocol: 'http', host: ['127.0.0.1'], path: name.split(' ')[1].split('/').filter(Boolean) },
+      url: `${BASE}${name.split(' ')[1]}`,
+      header: [{ key: 'content-type', value: 'application/json' }],
       body: { mode: 'raw', raw: JSON.stringify(body) },
     },
     event: [event('test', [
@@ -55,8 +60,10 @@ function authRequest(name, body, code) {
   });
 }
 
-authRequest('POST /user/', DEMO, '00035');
-authRequest('POST /user/login/', { email: DEMO.email, password: DEMO.password }, '00044');
+// The run seeds the demo user and sets it verified before the collection runs, so register
+// reads the duplicate rule and login reads the successful sign-in and stores the token.
+authRequest('POST /user/', DEMO, '00032');
+authRequest('POST /user/login/', { email: DEMO.email, password: DEMO.password }, '00047');
 
 for (const [method, routePath, , , needsAuth, fromSpec] of routes) {
   if (routePath === '/user/' || routePath === '/user/login/') continue;

@@ -12,16 +12,13 @@
           "name": "POST /user/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/",
+            "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\"email\":\"demo@mail.com\",\"password\":\"password1\",\"name\":\"Demo User\",\"username\":\"demo\"}"
@@ -33,7 +30,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n  pm.expect(body.code).toBe('00035');\n});\nconst body = pm.response.json(); if (body.data && body.data.accessToken) pm.environment.set('token', body.data.accessToken);"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n  pm.expect(body.code).to.equal('00032');\n});\nconst body = pm.response.json(); if (body.data && body.data.accessToken) pm.environment.set('token', body.data.accessToken);"
                 ]
               }
             }
@@ -43,17 +40,13 @@
           "name": "POST /user/login/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/login/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "login"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/login/",
+            "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\"email\":\"demo@mail.com\",\"password\":\"password1\"}"
@@ -65,7 +58,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n  pm.expect(body.code).toBe('00044');\n});\nconst body = pm.response.json(); if (body.data && body.data.accessToken) pm.environment.set('token', body.data.accessToken);"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n  pm.expect(body.code).to.equal('00047');\n});\nconst body = pm.response.json(); if (body.data && body.data.accessToken) pm.environment.set('token', body.data.accessToken);"
                 ]
               }
             }
@@ -80,18 +73,12 @@
           "name": "POST /user/logout/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/logout/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "logout"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/logout/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -108,7 +95,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -118,18 +105,12 @@
           "name": "POST /user/refresh-token/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/refresh-token/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "refresh-token"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/refresh-token/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -146,7 +127,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -156,18 +137,12 @@
           "name": "POST /user/send-verification-code/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/send-verification-code/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "send-verification-code"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/send-verification-code/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -184,7 +159,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -194,18 +169,12 @@
           "name": "POST /user/verify-email/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/verify-email/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "verify-email"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/verify-email/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -222,7 +191,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -232,18 +201,12 @@
           "name": "POST /user/change-password/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/change-password/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "change-password"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/change-password/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -260,7 +223,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -270,18 +233,12 @@
           "name": "POST /user/group/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/group/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "group"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/group/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -298,7 +255,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -308,19 +265,12 @@
           "name": "POST /user/group/add/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/group/add/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "group",
-                "add"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/group/add/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -337,7 +287,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -347,18 +297,12 @@
           "name": "DELETE /user/group/",
           "request": {
             "method": "DELETE",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/group/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "group"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/group/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -375,7 +319,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -385,18 +329,12 @@
           "name": "GET /user/group/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/group/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "group"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/group/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -409,7 +347,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -419,18 +357,12 @@
           "name": "POST /user/devices/ (not in the spec table)",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/devices/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "devices"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/devices/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -447,7 +379,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -457,18 +389,12 @@
           "name": "GET /user/devices/ (not in the spec table)",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/devices/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "devices"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/devices/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -481,7 +407,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -491,18 +417,12 @@
           "name": "GET /user/export/ (not in the spec table)",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/export/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "export"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/export/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -515,7 +435,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -525,19 +445,12 @@
           "name": "POST /user/group/leave/ (not in the spec table)",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/user/group/leave/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "user",
-                "group",
-                "leave"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/user/group/leave/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -554,7 +467,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -569,18 +482,12 @@
           "name": "POST /admin/category/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/category/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "category"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/category/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -597,7 +504,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -607,18 +514,12 @@
           "name": "GET /admin/category/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/category/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "category"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/category/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -631,7 +532,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -641,18 +542,12 @@
           "name": "PUT /admin/category/",
           "request": {
             "method": "PUT",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/category/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "category"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/category/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -669,7 +564,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -679,18 +574,12 @@
           "name": "DELETE /admin/category/",
           "request": {
             "method": "DELETE",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/category/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "category"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/category/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -707,7 +596,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -717,18 +606,12 @@
           "name": "POST /admin/unit/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/unit/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "unit"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/unit/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -745,7 +628,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -755,18 +638,12 @@
           "name": "GET /admin/unit/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/unit/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "unit"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/unit/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -779,7 +656,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -789,18 +666,12 @@
           "name": "PUT /admin/unit/",
           "request": {
             "method": "PUT",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/unit/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "unit"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/unit/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -817,7 +688,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -827,18 +698,12 @@
           "name": "DELETE /admin/unit/",
           "request": {
             "method": "DELETE",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/unit/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "unit"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/unit/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -855,7 +720,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -865,18 +730,12 @@
           "name": "GET /admin/logs/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/logs/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "logs"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/logs/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -889,7 +748,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -899,18 +758,12 @@
           "name": "GET /admin/users/ (not in the spec table)",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/users/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "users"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/users/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -923,7 +776,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -933,19 +786,12 @@
           "name": "POST /admin/users/role/ (not in the spec table)",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/users/role/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "users",
-                "role"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/users/role/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -962,7 +808,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -972,19 +818,12 @@
           "name": "POST /admin/sessions/logout/ (not in the spec table)",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/admin/sessions/logout/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "admin",
-                "sessions",
-                "logout"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/admin/sessions/logout/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1001,7 +840,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1016,17 +855,12 @@
           "name": "POST /food/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/food/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "food"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/food/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1043,7 +877,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1053,17 +887,12 @@
           "name": "PUT /food/",
           "request": {
             "method": "PUT",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/food/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "food"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/food/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1080,7 +909,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1090,17 +919,12 @@
           "name": "DELETE /food/",
           "request": {
             "method": "DELETE",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/food/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "food"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/food/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1117,7 +941,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1127,17 +951,12 @@
           "name": "GET /food/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/food/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "food"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/food/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1150,7 +969,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1160,18 +979,12 @@
           "name": "GET /food/unit/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/food/unit/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "food",
-                "unit"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/food/unit/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1184,7 +997,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1194,18 +1007,12 @@
           "name": "GET /food/category/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/food/category/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "food",
-                "category"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/food/category/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1218,7 +1025,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1228,18 +1035,12 @@
           "name": "GET /food/search/ (not in the spec table)",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/food/search/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "food",
-                "search"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/food/search/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1252,7 +1053,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1267,17 +1068,12 @@
           "name": "POST /fridge/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/fridge/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "fridge"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/fridge/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1294,7 +1090,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1304,17 +1100,12 @@
           "name": "PUT /fridge/",
           "request": {
             "method": "PUT",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/fridge/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "fridge"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/fridge/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1331,7 +1122,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1341,17 +1132,12 @@
           "name": "DELETE /fridge/",
           "request": {
             "method": "DELETE",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/fridge/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "fridge"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/fridge/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1368,7 +1154,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1378,17 +1164,12 @@
           "name": "GET /fridge/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/fridge/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "fridge"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/fridge/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1401,7 +1182,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1411,18 +1192,12 @@
           "name": "GET /fridge/:foodName/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/fridge/:foodName/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "fridge",
-                ":foodName"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/fridge/:foodName/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1435,7 +1210,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1450,17 +1225,12 @@
           "name": "POST /shopping/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/shopping/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "shopping"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/shopping/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1477,7 +1247,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1487,17 +1257,12 @@
           "name": "PUT /shopping/",
           "request": {
             "method": "PUT",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/shopping/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "shopping"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/shopping/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1514,7 +1279,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1524,17 +1289,12 @@
           "name": "DELETE /shopping/",
           "request": {
             "method": "DELETE",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/shopping/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "shopping"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/shopping/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1551,7 +1311,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1561,18 +1321,12 @@
           "name": "POST /shopping/task/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/shopping/task/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "shopping",
-                "task"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/shopping/task/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1589,7 +1343,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1599,18 +1353,12 @@
           "name": "GET /shopping/task/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/shopping/task/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "shopping",
-                "task"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/shopping/task/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1623,7 +1371,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1633,18 +1381,12 @@
           "name": "PUT /shopping/task/",
           "request": {
             "method": "PUT",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/shopping/task/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "shopping",
-                "task"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/shopping/task/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1661,7 +1403,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1671,18 +1413,12 @@
           "name": "DELETE /shopping/task/",
           "request": {
             "method": "DELETE",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/shopping/task/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "shopping",
-                "task"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/shopping/task/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1699,7 +1435,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1709,17 +1445,12 @@
           "name": "GET /shopping/ (not in the spec table)",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/shopping/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "shopping"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/shopping/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1732,7 +1463,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1742,18 +1473,12 @@
           "name": "POST /shopping/claim/ (not in the spec table)",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/shopping/claim/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "shopping",
-                "claim"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/shopping/claim/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1770,7 +1495,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1780,18 +1505,12 @@
           "name": "POST /shopping/bought/ (not in the spec table)",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/shopping/bought/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "shopping",
-                "bought"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/shopping/bought/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1808,7 +1527,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1823,17 +1542,12 @@
           "name": "POST /meal/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/meal/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "meal"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/meal/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1850,7 +1564,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1860,17 +1574,12 @@
           "name": "PUT /meal/",
           "request": {
             "method": "PUT",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/meal/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "meal"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/meal/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1887,7 +1596,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1897,17 +1606,12 @@
           "name": "DELETE /meal/",
           "request": {
             "method": "DELETE",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/meal/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "meal"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/meal/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1924,7 +1628,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1934,17 +1638,12 @@
           "name": "GET /meal/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/meal/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "meal"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/meal/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1957,7 +1656,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -1967,18 +1666,12 @@
           "name": "GET /meal/suggested/ (not in the spec table)",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/meal/suggested/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "meal",
-                "suggested"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/meal/suggested/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -1991,7 +1684,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2001,18 +1694,12 @@
           "name": "POST /meal/generate-list/ (not in the spec table)",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/meal/generate-list/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "meal",
-                "generate-list"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/meal/generate-list/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2029,7 +1716,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2044,17 +1731,12 @@
           "name": "POST /recipe/",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/recipe/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "recipe"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/recipe/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2071,7 +1753,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2081,17 +1763,12 @@
           "name": "PUT /recipe/",
           "request": {
             "method": "PUT",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/recipe/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "recipe"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/recipe/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2108,7 +1785,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2118,17 +1795,12 @@
           "name": "DELETE /recipe/",
           "request": {
             "method": "DELETE",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/recipe/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "recipe"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/recipe/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2145,7 +1817,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2155,17 +1827,12 @@
           "name": "GET /recipe/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/recipe/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "recipe"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/recipe/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2178,7 +1845,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2188,18 +1855,12 @@
           "name": "GET /recipe/:foodId/",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/recipe/:foodId/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "recipe",
-                ":foodId"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/recipe/:foodId/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2212,7 +1873,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2222,18 +1883,12 @@
           "name": "POST /recipe/ingredients/ (not in the spec table)",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/recipe/ingredients/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "recipe",
-                "ingredients"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/recipe/ingredients/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2250,7 +1905,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2265,17 +1920,12 @@
           "name": "POST /sync/ (not in the spec table)",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/sync/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "sync"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/sync/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2292,7 +1942,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2307,17 +1957,12 @@
           "name": "POST /consumption/ (not in the spec table)",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/consumption/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "consumption"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/consumption/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2334,7 +1979,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2349,18 +1994,12 @@
           "name": "GET /reports/purchases/ (not in the spec table)",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/reports/purchases/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "reports",
-                "purchases"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/reports/purchases/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2373,7 +2012,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2383,18 +2022,12 @@
           "name": "GET /reports/consumption/ (not in the spec table)",
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/reports/consumption/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "reports",
-                "consumption"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/reports/consumption/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2407,7 +2040,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }
@@ -2422,17 +2055,12 @@
           "name": "POST /uploads/ (not in the spec table)",
           "request": {
             "method": "POST",
-            "url": {
-              "raw": "http://127.0.0.1:5000/it4788/uploads/",
-              "protocol": "http",
-              "host": [
-                "127.0.0.1"
-              ],
-              "path": [
-                "uploads"
-              ]
-            },
+            "url": "http://127.0.0.1:5000/it4788/uploads/",
             "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
               {
                 "key": "authorization",
                 "value": "{{token}}"
@@ -2449,7 +2077,7 @@
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
                 ]
               }
             }

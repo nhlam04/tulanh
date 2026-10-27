@@ -1,0 +1,292 @@
+{
+  "collection": {
+    "item": [
+      {
+        "id": "996a0846-bbb5-49c5-bead-c1b026dc4385",
+        "name": "get",
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "5093",
+            "path": [
+              "{{base}}",
+              "x"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": []
+      }
+    ],
+    "event": [],
+    "variable": [],
+    "info": {
+      "_postman_id": "f47f17e2-b844-40fd-98bc-7cbbd5b41021",
+      "name": "variable inside the path",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    }
+  },
+  "environment": {
+    "id": "39a50915-2e64-4ae2-8baa-0b710f7ab827",
+    "values": []
+  },
+  "globals": {
+    "id": "f8cff6c4-67b0-4c22-a875-bb67cc4c9124",
+    "values": []
+  },
+  "run": {
+    "stats": {
+      "iterations": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "items": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "scripts": {
+        "total": 0,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "requests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "tests": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "assertions": {
+        "total": 0,
+        "pending": 0,
+        "failed": 0
+      },
+      "testScripts": {
+        "total": 0,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequestScripts": {
+        "total": 0,
+        "pending": 0,
+        "failed": 0
+      }
+    },
+    "timings": {
+      "responseAverage": 7,
+      "responseMin": 7,
+      "responseMax": 7,
+      "responseSd": 0,
+      "dnsAverage": 0,
+      "dnsMin": 0,
+      "dnsMax": 0,
+      "dnsSd": 0,
+      "firstByteAverage": 0,
+      "firstByteMin": 0,
+      "firstByteMax": 0,
+      "firstByteSd": 0,
+      "started": 1793078014049,
+      "completed": 1793078014066
+    },
+    "executions": [
+      {
+        "cursor": {
+          "position": 0,
+          "iteration": 0,
+          "length": 1,
+          "cycles": 1,
+          "empty": false,
+          "eof": false,
+          "bof": true,
+          "cr": false,
+          "ref": "0da7c1e6-72e5-45fe-9af5-fe17ef76e20d",
+          "httpRequestId": "af6f9574-4c30-4216-8734-4501c6f05b53"
+        },
+        "item": {
+          "id": "996a0846-bbb5-49c5-bead-c1b026dc4385",
+          "name": "get",
+          "request": {
+            "url": {
+              "protocol": "http",
+              "port": "5093",
+              "path": [
+                "{{base}}",
+                "x"
+              ],
+              "host": [
+                "127",
+                "0",
+                "0",
+                "1"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": []
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "5093",
+            "path": [
+              "%7B%7Bbase%7D%7D",
+              "x"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "07330dd1-3413-4641-97c2-5fdd0ba85bb5",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:5093",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "af9f1c38-61a3-433b-946a-19da9d3e3c41",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "content-type",
+              "value": "application/json"
+            },
+            {
+              "key": "Date",
+              "value": "Tue, 27 Oct 2026 05:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            },
+            {
+              "key": "Transfer-Encoding",
+              "value": "chunked"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              48,
+              48,
+              48,
+              48,
+              48,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              111,
+              107,
+              34,
+              44,
+              34,
+              100,
+              97,
+              116,
+              97,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 7,
+          "responseSize": 43
+        },
+        "id": "996a0846-bbb5-49c5-bead-c1b026dc4385"
+      }
+    ],
+    "transfers": {
+      "responseTotal": 43
+    },
+    "failures": [],
+    "error": null
+  }
+}

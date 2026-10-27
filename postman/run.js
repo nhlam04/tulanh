@@ -1,27 +1,33 @@
-// Collection run (Hòa, QA): starts the server against a single-node replica set and walks the
+// Collection run (Hòa, QA): starts the server against a single-node replica set and runs the
 // collection built from the route table.
 //
-// Newman does not complete on this machine. It runs the requests, but the end event never
-// fires, so a run that waits for it hangs. Checked on 2026-10-27: one request reached the
-// server, the test event fired, and no end event came within 20 seconds. So the runner walks
-// the same collection over http and applies the same rule. Newman stays the tool named in the
-// test plan, for a machine where it completes.
+// Newman 6.2.3, checked on 2026-10-27: the run completes through the callback form. The emitter
+// form on its own does not complete, because the end event never fires. The first version of this
+// file used the emitter form and read `summary.run.responseCount.total`, which is undefined without
+// a reporter, so the handler threw and the run looked like a hang. Memory was not the cause: the
+// same probe ran with 27.9 GB free and behaved the same way.
 //
-// The verification code cannot be read inside the run, because it leaves the server through
-// the mail path. So the runner registers the demo user, sets it verified in the database, and
-// then runs the collection. The register request in the collection reads the duplicate rule,
-// which is a result, not a failure.
+// The codes read by each request are not collected here. The event that carries the response does
+// not fire in the callback form on this version, so the codes come from walk.js, which sends the
+// same requests over http.
+//
+// The first version of this file looked like it hung. It did not: it used the emitter form alone and
+// read `summary.run.responseCount.total`, which is undefined without a reporter, so the handler threw
+// and the promise never resolved. Memory was not the cause — the same probe ran with 27.9 GB free and
+// behaved the same way.
+//
+// The run cannot read the mailbox, because the verification code leaves the server through the mail
+// path. So the run registers the demo user here, sets it verified in the database, and then runs the
+// collection. The register request inside the collection reads the duplicate rule, and the login
+// request reads the successful sign-in and stores the token.
 const { MongoMemoryReplSet } = require('mongodb-memory-server');
 const { MongoClient } = require('mongodb');
+const newman = require('newman');
 const { spawn } = require('node:child_process');
 
 const PORT = 5000;
 const BASE = `http://127.0.0.1:${PORT}/it4788`;
 const DEMO = { email: 'demo@mail.com', password: 'password1', name: 'Demo User', username: 'demo' };
-
-function pathOf(url) {
-  return String(url).replace(BASE, '');
-}
 
 async function main() {
   const rs = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
@@ -38,47 +44,32 @@ async function main() {
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(DEMO),
   });
-  const seeded = await created.json();
-  console.log('seed register:', seeded.code, 'user:', seeded.data && seeded.data.user && seeded.data.user.id);
+  console.log('seed register:', (await created.json()).code);
 
   const client = await MongoClient.connect(uri);
   await client.db('ishop').collection('users').updateOne({ email: DEMO.email }, { $set: { is_verified: true, role: 'admin' } });
 
-  const login = await fetch(`${BASE}/user/login/`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ email: DEMO.email, password: DEMO.password }),
-  });
-  const session = await login.json();
-  const token = session.data && session.data.accessToken;
-  console.log('login:', session.code, 'token set:', Boolean(token));
-
   const collection = JSON.parse(require('node:fs').readFileSync(`${__dirname}/ishop.postman_collection.json`, 'utf-8'));
-  const results = [];
-  for (const folder of collection.item) {
-    for (const entry of folder.item) {
-      const request = entry.request;
-      const url = pathOf(request.url.raw);
-      const response = await fetch(BASE + url, {
-        method: request.method,
-        headers: {
-          'content-type': 'application/json',
-          ...(token ? { authorization: `Bearer ${token}` } : {}),
-        },
-        body: ['POST', 'PUT', 'DELETE'].includes(request.method) ? (request.body ? request.body.raw : undefined) : undefined,
-      });
-      const body = await response.json();
-      const shapeOk = Object.keys(body).sort().join(',') === 'code,data,message';
-      results.push({ folder: folder.name, request: entry.name, status: response.status, code: body.code, shapeOk });
-    }
-  }
+  const requestCount = collection.item.reduce((total, folder) => total + folder.item.length, 0);
 
-  const badShape = results.filter((row) => !row.shapeOk);
-  const codes = {};
-  for (const row of results) codes[row.code] = (codes[row.code] || 0) + 1;
-  console.log('requests:', results.length, 'envelope rule holds:', results.length - badShape.length);
-  for (const row of badShape) console.log('  shape broken:', row.request, JSON.stringify(row));
-  console.log('codes seen:', Object.entries(codes).sort((a, b) => b[1] - a[1]).map(([code, count]) => `${code} x${count}`).join(', '));
+  const failures = [];
+
+  const summary = await new Promise((resolve, reject) => {
+    const emitter = newman.run({
+      collection: `${__dirname}/ishop.postman_collection.json`,
+      env: [{ key: 'token', value: '' }],
+      timeout: 10000,
+    }, (error, run) => (error ? reject(error) : resolve(run)));
+
+    emitter.on('assertion', (source) => {
+      for (const assertion of source.assertions || []) {
+        if (!assertion.passed) failures.push(`${source.item && source.item.name}: ${assertion.error && assertion.error.message}`);
+      }
+    });
+  });
+
+  console.log('folders:', collection.item.length, 'requests:', requestCount, 'failures:', failures.length);
+  for (const failure of failures) console.log(' -', failure);
 
   await client.close();
   server.kill('SIGTERM');

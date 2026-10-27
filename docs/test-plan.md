@@ -26,29 +26,42 @@ Run set:
 - `npm run test:api` — the HTTP layer with the rate limit and the envelope shape.
 - Postman collection in `postman/ishop.postman_collection.json`, built from the route
   table in `src/routes.js`, so the collection cannot drift from the server.
-- Newman for the run: `newman run postman/ishop.postman_collection.json`.
+- Newman for the run: `newman run postman/ishop.postman_collection.json`. The command form
+  completes on this machine, checked on 2026-10-27. `postman/run.js` runs the same collection
+  through the library with the demo user seeded first, and `postman/walk.js` reports the codes.
 
 Cross-check pairs, from the assignment table: Lâm and Việt check the mobile screens,
 Minh and Hùng check the API, and Hòa checks the whole system.
 
 ## Run result, 2026-10-27
 
-The collection walks 66 requests: 49 from the spec table and 17 the build adds. The server
-ran against a single-node replica set.
+The collection holds 66 requests: 49 from the spec table and 17 the build adds. The server ran
+against a single-node replica set.
 
 | Result | Value |
 | --- | --- |
+| Requests | 66, 49 from the spec table and 17 the build adds |
+| Newman run | 0 failures |
 | Envelope rule holds on every response | 66 of 66 |
-| Requests that hit the rate limit | 8, code 00024, so the 60 per minute rule reads as written |
-| Login | code 00047, token set for the rest of the walk |
-| Required-field codes | 24 of 66, because the walk sends an empty body on purpose |
-| Permission and group codes | 00167 x2, 00345 x5, 00210 x4, 00225 x2 |
+| Register inside the collection | 00032, the duplicate rule, because the run seeds the user first |
+| Login | 00047, token stored for the rest of the run |
+| Required-field codes | 24, because the walk sends an empty body on purpose |
+| Rate limit | 8 requests read 00024, so the 60 per minute rule reads as written |
 
-Newman does not complete on this machine. It sends the request and fires the test event, but
-the end event never arrives, so a run that waits for it hangs. Checked with one request against
-a plain local server: response received, test event fired, no end event within 20 seconds. The
-collection stays the artifact, and the run on this machine walks the same collection over http.
-Newman remains the tool named in the plan for a machine where it completes.
+The first version of the runner looked like it hung. It did not. Newman 6.2.3 completes through the
+callback form; the emitter form on its own never fires the end event, and the handler read
+`summary.run.responseCount.total`, which is undefined without a reporter, so it threw and the promise
+never resolved. Memory was not the cause: the same single-request probe ran with 27.9 GB free and
+behaved the same way. Four more things had to be corrected on the way:
+
+- the url carries the port, as a string or as its own field in the object form;
+- a variable in the host position is not resolved, so the host is written plainly;
+- a raw body needs the content-type header, or the server reads the required-field code;
+- the sandbox chai on this machine has no `toEqual` or `toBe`, so plain equality is used.
+
+The codes read by each request come from walk.js, because the callback form does not carry the
+response through an event on this version. The walk is not a second test tool; it reports what the
+same collection reads.
 
 What runs on this machine today: Jest unit tests over the fake store, the node runner
 integration tests against a single-node replica set, the HTTP layer test, and the two

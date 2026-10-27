@@ -63,6 +63,10 @@ The codes read by each request come from walk.js, because the callback form does
 response through an event on this version. The walk is not a second test tool; it reports what the
 same collection reads.
 
+One rule reads differently in a run: the rate limit window is a calendar minute, so a run that
+crosses the boundary can land 60 requests in each window and read no limit. The test sends until
+the limit answers. The 8 requests that read 00024 in the walk above are the rule working, not a fault.
+
 What runs on this machine today: Jest unit tests over the fake store, the node runner
 integration tests against a single-node replica set, the HTTP layer test, and the two
 client rule tests. React Native Testing Library and Detox need the React Native toolchain,

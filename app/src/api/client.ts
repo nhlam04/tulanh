@@ -24,6 +24,19 @@ export function messageFor(code: string): string {
   return (codes as Record<string, string>)[code] || (codes as Record<string, string>)['00114'];
 }
 
+// The one notice rule (D108): a screen shows a sentence, never a code. Rule 9 of the
+// course's Mobile HCI list words an error in plain language and says to avoid overusing
+// codes, and Bài tập 06 lists "use the interface to debug" as not a design principle.
+// The code stays where it is read as data: the Postman collection, the integration log,
+// the admin page. `bad` is the colour rule (rule 2): red for a call that did not work.
+export type Note = { text: string; bad: boolean };
+
+export function notice(out: { code: string; message?: string; status?: number }): Note {
+  const text = out.message && out.message.trim() ? out.message.trim() : messageFor(out.code);
+  const bad = out.status === undefined ? false : out.status === 0 || out.status >= 400;
+  return { text, bad };
+}
+
 export type RequestOptions = {
   method?: 'get' | 'post' | 'put' | 'delete';
   body?: unknown;

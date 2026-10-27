@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { Stack, useRouter } from 'expo-router';
 import * as Notifications from 'expo-notifications';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SessionProvider } from '../session';
 import { screenFor, watchTap } from '../features/push';
 
@@ -24,7 +25,11 @@ export default function Layout() {
 
   return (
     <SessionProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      {/* Rule 1 of the Mobile HCI list: the system status line stays unbroken, so the
+      screens start below it instead of under it. */}
+      <SafeAreaProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </SafeAreaProvider>
     </SessionProvider>
   );
 }

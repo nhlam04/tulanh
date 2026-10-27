@@ -246,4 +246,34 @@ describe('the CRUD paths that the spec lists', () => {
     const big = await images.storeImage(deps, { userId: 'u1', groupId: 'g1', input: { image: 'big.png', size: 20 * 1024 * 1024 } });
     expect(big.code).toBe('00158');
   });
+
+  test('the send answer is a ticket, and a receipt that reads DeviceNotRegistered stops the token', async () => {
+    const deps = seed();
+    const push = require('../../src/senders/push');
+    deps.push = (devices, lot, timezone) => push.sendPush(devices, lot, timezone);
+    deps.receipts = (ids) => push.checkReceipts(ids);
+    await deps.repos.groups.insertOne({ _id: 'g1', leader_id: 'u1', timezone: 'Asia/Ho_Chi_Minh' });
+    await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'thit' });
+    await deps.repos.fridge_lots.insertOne({ _id: 'lot1', group_id: 'g1', food_id: 'f1', quantity: 1, use_until: '2026-10-28', created_by: 'u1' });
+    const device = await deps.repos.user_devices.insertOne({ _id: 'd1', user_id: 'u1', push_token: 'ExponentPushToken[abc]', unregistered_at: null });
+
+    const answers = [
+      { data: [{ status: 'ok', id: 'ticket1' }] },
+      { data: { ticket1: { status: 'error', details: { error: 'DeviceNotRegistered' } } } },
+    ];
+    const original = global.fetch;
+    global.fetch = async () => ({ json: async () => answers.shift() });
+    const sent = await jobs.runReminder(deps, new Date('2026-10-26T00:00:00Z'));
+    const checked = await jobs.runReceipts(deps);
+    global.fetch = original;
+
+    expect(sent.length).toBe(1);
+    expect(checked[0].status).toBe('error');
+    const row = await deps.repos.notification_log.findOne({ ticket_id: 'ticket1' });
+    expect(row.receipt_error).toBe('DeviceNotRegistered');
+    const stopped = await deps.repos.user_devices.findOne({ _id: device._id });
+    expect(stopped.unregistered_at).not.toBeNull();
+    const again = await push.sendPush([stopped], { _id: 'lot1', use_until: '2026-10-28' }, 'Asia/Ho_Chi_Minh');
+    expect(again.data.skipped).toBe(true);
+  });
 });

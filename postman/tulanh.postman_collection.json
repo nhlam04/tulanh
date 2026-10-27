@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "ishop-api",
+    "name": "tulanh-api",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0",
     "description": "Built from src/routes.js. The order runs auth first, so the token is set before the reads."
   },
@@ -174,16 +174,13 @@
               {
                 "key": "content-type",
                 "value": "application/json"
-              },
-              {
-                "key": "authorization",
-                "value": "{{token}}"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{}"
-            }
+              "raw": "{\"email\":\"demo@mail.com\",\"code\":\"123456\"}"
+            },
+            "description": "D96: the email names the account; a session is not needed and is not read."
           },
           "event": [
             {

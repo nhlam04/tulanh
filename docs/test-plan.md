@@ -24,9 +24,9 @@ Run set:
 - `npm run test:integration` — node runner against a single-node replica set, because a
   cross-collection write needs one.
 - `npm run test:api` — the HTTP layer with the rate limit and the envelope shape.
-- Postman collection in `postman/ishop.postman_collection.json`, built from the route
+- Postman collection in `postman/tulanh.postman_collection.json`, built from the route
   table in `src/routes.js`, so the collection cannot drift from the server.
-- Newman for the run: `newman run postman/ishop.postman_collection.json`. The command form
+- Newman for the run: `newman run postman/tulanh.postman_collection.json`. The command form
   completes on this machine, checked on 2026-10-27. `postman/run.js` runs the same collection
   through the library with the demo user seeded first, and `postman/walk.js` reports the codes.
 

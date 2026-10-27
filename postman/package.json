@@ -1,5 +1,5 @@
 {
-  "name": "ishop-qa",
+  "name": "tulanh-qa",
   "private": true,
   "scripts": {
     "build": "node build-collection.js",

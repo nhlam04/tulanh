@@ -28,7 +28,7 @@ async function main() {
   console.log('seed register:', (await created.json()).code);
 
   const client = await MongoClient.connect(uri);
-  await client.db('ishop').collection('users').updateOne({ email: DEMO.email }, { $set: { is_verified: true, role: 'admin' } });
+  await client.db('tulanh').collection('users').updateOne({ email: DEMO.email }, { $set: { is_verified: true, role: 'admin' } });
 
   const login = await fetch(`${BASE}/user/login/`, {
     method: 'POST',
@@ -39,7 +39,7 @@ async function main() {
   const token = session.data && session.data.accessToken;
   console.log('login:', session.code, 'token set:', Boolean(token));
 
-  const collection = JSON.parse(require('node:fs').readFileSync(`${__dirname}/ishop.postman_collection.json`, 'utf-8'));
+  const collection = JSON.parse(require('node:fs').readFileSync(`${__dirname}/tulanh.postman_collection.json`, 'utf-8'));
   const results = [];
   for (const folder of collection.item) {
     for (const entry of folder.item) {

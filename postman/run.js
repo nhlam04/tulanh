@@ -47,16 +47,16 @@ async function main() {
   console.log('seed register:', (await created.json()).code);
 
   const client = await MongoClient.connect(uri);
-  await client.db('ishop').collection('users').updateOne({ email: DEMO.email }, { $set: { is_verified: true, role: 'admin' } });
+  await client.db('tulanh').collection('users').updateOne({ email: DEMO.email }, { $set: { is_verified: true, role: 'admin' } });
 
-  const collection = JSON.parse(require('node:fs').readFileSync(`${__dirname}/ishop.postman_collection.json`, 'utf-8'));
+  const collection = JSON.parse(require('node:fs').readFileSync(`${__dirname}/tulanh.postman_collection.json`, 'utf-8'));
   const requestCount = collection.item.reduce((total, folder) => total + folder.item.length, 0);
 
   const failures = [];
 
   const summary = await new Promise((resolve, reject) => {
     const emitter = newman.run({
-      collection: `${__dirname}/ishop.postman_collection.json`,
+      collection: `${__dirname}/tulanh.postman_collection.json`,
       env: [{ key: 'token', value: '' }],
       timeout: 10000,
     }, (error, run) => (error ? reject(error) : resolve(run)));

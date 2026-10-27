@@ -26,16 +26,30 @@ function envelopeTest(code) {
   ].filter(Boolean);
 }
 
+// Bodies the route table cannot say. The verify-email loop is keyed by the email plus the
+// code, and it runs before any session exists (D96), so this request sends the two fields and
+// carries no authorization header.
+const OVERRIDES = {
+  'post /user/verify-email/': {
+    body: { email: DEMO.email, code: '123456' },
+    auth: false,
+    note: 'D96: the email names the account; a session is not needed and is not read.',
+  },
+};
+
 function requestFor(method, routePath, fromSpec) {
-  const needsAuth = ['post', 'put', 'delete'].includes(method) || !['user/'].includes(routePath.replace('/', ''));
+  const override = OVERRIDES[`${method} ${routePath}`];
   const folder = routePath.split('/')[1] || 'root';
+  const header = [{ key: 'content-type', value: 'application/json' }];
+  if (!override || override.auth !== false) header.push({ key: 'authorization', value: '{{token}}' });
   const item = {
     name: `${method.toUpperCase()} ${routePath}${fromSpec ? '' : ' (not in the spec table)'}`,
     request: {
       method: method.toUpperCase(),
       url: `${BASE}${routePath}`,
-      header: [{ key: 'content-type', value: 'application/json' }, { key: 'authorization', value: '{{token}}' }],
-      body: ['post', 'put', 'delete'].includes(method) ? { mode: 'raw', raw: '{}' } : undefined,
+      header,
+      body: ['post', 'put', 'delete'].includes(method) ? { mode: 'raw', raw: JSON.stringify(override?.body || {}) } : undefined,
+      ...(override ? { description: override.note } : {}),
     },
     event: [event('test', envelopeTest().join('\n'))],
   };
@@ -74,13 +88,13 @@ for (const [method, routePath, , , needsAuth, fromSpec] of routes) {
 
 const collection = {
   info: {
-    name: 'ishop-api',
+    name: 'tulanh-api',
     schema: 'https://schema.getpostman.com/json/collection/v2.1.0',
     description: 'Built from src/routes.js. The order runs auth first, so the token is set before the reads.',
   },
   item: Object.entries(folders).map(([name, items]) => ({ name, item: items })),
 };
 
-const out = path.join(__dirname, 'ishop.postman_collection.json');
+const out = path.join(__dirname, 'tulanh.postman_collection.json');
 fs.writeFileSync(out, JSON.stringify(collection, null, 2) + '\n');
 console.log('written', out, 'folders', Object.keys(folders).length, 'requests', routes.length + 1);

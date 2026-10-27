@@ -3,7 +3,6 @@
 const indexes = {
   users: [{ keys: { email: 1 }, unique: true }, { keys: { username: 1 }, unique: true }],
   groups: [{ keys: { leader_id: 1 } }],
-  membership: [{ keys: { group_id: 1, user_id: 1 }, unique: true }],
   categories: [{ keys: { name: 1 }, unique: true }],
   units: [{ keys: { name: 1 }, unique: true }],
   foods: [{ keys: { group_id: 1, name: 1 }, unique: true }, { keys: { name: 'text' } }],

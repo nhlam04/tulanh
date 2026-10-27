@@ -7,7 +7,7 @@ const senders = require('./senders/push');
 const mailer = require('./senders/mailer');
 
 const COLLECTIONS = [
-  'users', 'groups', 'membership', 'categories', 'units', 'foods', 'fridge_lots',
+  'users', 'groups', 'categories', 'units', 'foods', 'fridge_lots',
   'shopping_lists', 'shopping_tasks', 'meal_plans', 'recipes', 'ingredients',
   'consumption_events', 'user_devices', 'refresh_tokens', 'verification_codes',
   'notification_log', 'system_logs',

@@ -54,9 +54,16 @@ async function listLots(deps, ctx) {
   return { code: '00228', data: { lots } };
 }
 
+// The spec path is /fridge/:foodName/, so the food row is read by name, not by id. The
+// name match is exact, which is the same rule as the ingredient read in D77.
 async function lotsByFood(deps, ctx) {
   if (!ctx.groupId) return { code: '00225' };
-  const lots = await deps.repos.fridge_lots.find({ group_id: ctx.groupId, food_id: ctx.input.foodId });
+  const foodId = ctx.input.foodId || (await (async () => {
+    const food = await deps.repos.foods.findOne({ group_id: ctx.groupId, name: ctx.input.foodName });
+    return food ? food._id : null;
+  })());
+  if (!foodId) return { code: '00230' };
+  const lots = await deps.repos.fridge_lots.find({ group_id: ctx.groupId, food_id: foodId });
   return { code: '00386', data: { lots } };
 }
 

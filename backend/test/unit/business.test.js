@@ -215,6 +215,18 @@ describe('the CRUD paths that the spec lists', () => {
     expect((await shopping.deleteTask(deps, { ...leader, input: { taskId: task._id } })).code).toBe('00299');
   });
 
+  test('the fridge read by food name resolves the stored row (spec path /fridge/:foodName/)', async () => {
+    const deps = seed();
+    const ctx = { userId: 'u1', role: 'user', groupId: 'g1' };
+    const food = await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'ca', created_by: 'u1' });
+    await deps.repos.fridge_lots.insertOne({ group_id: 'g1', food_id: food._id, quantity: 2, use_until: '2026-11-01', created_by: 'u1' });
+    const hit = await fridge.lotsByFood(deps, { ...ctx, input: { foodName: 'ca' } });
+    expect(hit.code).toBe('00386');
+    expect(hit.data.lots.length).toBe(1);
+    const miss = await fridge.lotsByFood(deps, { ...ctx, input: { foodName: 'khong co' } });
+    expect(miss.code).toBe('00230');
+  });
+
   test('recipe delete and read by food (codes 00376, 00348)', async () => {
     const deps = seed();
     const ctx = { userId: 'u1', role: 'user', groupId: 'g1' };

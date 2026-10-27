@@ -48,5 +48,15 @@ docker run -p 1025:1025 -p 8025:8025 mailhog/mailhog
 Then send a code with an empty `SMTP_HOST` first, to see the noop path, and set
 `SMTP_HOST=127.0.0.1` to see the message arrive on the capture page.
 
+To run against the team account instead:
+
+```bash
+node scripts/check-mail.js
+```
+
+The script reads `.env`, verifies the transport, and sends one test message. It prints no
+credential. The app password stays in `.env`, which git ignores, and it is revoked before
+the report is handed in. The report shows the inbox and the rule, not the password.
+
 Tests: `npm test` for Jest, `npm run test:integration` for the replica set proof,
 `npm run test:api` for the HTTP layer.

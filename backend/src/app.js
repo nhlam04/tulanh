@@ -25,6 +25,7 @@ function buildDeps(store, extra = {}) {
     message,
     sendEmail: extra.sendEmail || mailer.sendEmail,
     push: extra.push || senders.sendPush,
+    receipts: extra.receipts || senders.checkReceipts,
     emit: extra.emit || (() => {}),
     pageLimit: config.pageLimit,
     logRetentionDays: config.logRetentionDays,

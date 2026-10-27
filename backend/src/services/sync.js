@@ -8,11 +8,16 @@ async function applyOps(deps, ctx) {
   if (!ops.length) return { code: '00025', data: null };
   const applied = [];
   for (const op of ops) {
-    const call = { userId: ctx.userId, groupId: ctx.groupId, role: 'user', input: { ...op } };
+    // The device sends an op as { type, requestId, payload }; a flat op is the shape the
+    // tests and any other caller use. Both carry the same fields, so one read covers both.
+    const fields = { ...(op.payload || {}), ...op };
+    delete fields.payload;
+    delete fields.sentAt;
+    const call = { userId: ctx.userId, groupId: ctx.groupId, role: 'user', input: fields };
     if (op.type === 'consumption') {
       applied.push(await consumption.recordConsumption(deps, call));
     } else if (op.type === 'task_add') {
-      applied.push(await shopping.addTasks(deps, { ...call, input: { listId: op.listId, tasks: [op] } }));
+      applied.push(await shopping.addTasks(deps, { ...call, input: { listId: fields.listId, tasks: [fields] } }));
     } else if (op.type === 'task_bought') {
       applied.push(await shopping.markBought(deps, call));
     } else {

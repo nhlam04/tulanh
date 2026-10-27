@@ -5,10 +5,12 @@
     "shared",
     "backend",
     "app",
-    "admin-web"
+    "admin-web",
+    "postman"
   ],
   "dependencies": {
     "@types/jest": "^29.5.9",
+    "newman": "^6.2.3",
     "nodemailer": "^10.2.1"
   }
 }

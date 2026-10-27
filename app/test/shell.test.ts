@@ -2,6 +2,7 @@
 import { request, setBase, baseUrl, DEFAULT_BASE } from '../src/api/client';
 import { init, queueOp, pendingOps, markSent, QueueDb } from '../src/offline/queue';
 import { sendQueue } from '../src/offline/send';
+import { BASE_URL_KEY, initSettings, readSetting, writeSetting } from '../src/settings';
 import { writeOrQueue } from '../src/offline/write';
 import type { Session } from '../src/session';
 
@@ -120,4 +121,27 @@ test('the socket handshake carries the token, and the url is the origin', async 
   };
   expect(connection.url).toBe('http://127.0.0.1:5000');
   expect(connection.options.auth.token).toBe('t1');
+});
+
+// Device setting rule (D100): the address typed on the phone is kept for the next launch.
+test('the device keeps the server address it was given (D100)', () => {
+  const values: Record<string, string> = {};
+  const db: QueueDb = {
+    run(sql, params) {
+      if (sql.startsWith('INSERT INTO settings')) values[String(params[0])] = String(params[1]);
+    },
+    all() {
+      return [];
+    },
+    get(sql, params) {
+      const key = String(params[0]);
+      return values[key] === undefined ? null : { value: values[key] };
+    },
+  };
+  initSettings(db);
+  expect(readSetting(db, BASE_URL_KEY)).toBe(null);
+  writeSetting(db, BASE_URL_KEY, 'http://192.168.1.10:5000/it4788');
+  expect(readSetting(db, BASE_URL_KEY)).toBe('http://192.168.1.10:5000/it4788');
+  writeSetting(db, BASE_URL_KEY, 'https://tulanh-api-mapotofu40-5000.ngrok.io/it4788');
+  expect(readSetting(db, BASE_URL_KEY)).toBe('https://tulanh-api-mapotofu40-5000.ngrok.io/it4788');
 });

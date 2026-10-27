@@ -16,7 +16,7 @@ export default function AuthScreen() {
   const [code, setCode] = useState('');
   const [groupName, setGroupName] = useState('');
   const [base, setBaseUrl] = useState(session.base);
-  const [message, setMessage] = useState('Tủ lành của bạn');
+  const [message, setMessage] = useState('Đăng ký hoặc đăng nhập');
 
   function show(out: { code: string; message?: string }) {
     setMessage(`${out.code} — ${out.message || messageFor(out.code)}`);
@@ -56,6 +56,7 @@ export default function AuthScreen() {
       <Text style={styles.title}>Tủ lành của bạn</Text>
       <Text>{message}</Text>
       <Field label="Địa chỉ server" value={base} onChangeText={(next) => { setBaseUrl(next); session.setBase(next); }} />
+      <Text style={styles.muted}>Máy giữ địa chỉ này cho những lần mở sau.</Text>
       <Field label="Email" value={email} onChangeText={setEmail} />
       <Field label="Mật khẩu" value={password} onChangeText={setPassword} />
       <Field label="Tên hiển thị" value={name} onChangeText={setName} />

@@ -8,6 +8,7 @@ import { openQueueDb } from './offline/db';
 import { init as initQueue, type QueueDb } from './offline/queue';
 import { startShell } from './shell';
 import { baseUrl, request, setBase } from './api/client';
+import { BASE_URL_KEY, initSettings, readSetting, writeSetting } from './settings';
 
 export type Session = {
   token: string | null;
@@ -33,6 +34,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const db = useMemo(() => {
     const handle = openQueueDb();
     initQueue(handle);
+    initSettings(handle);
     return handle;
   }, []);
   const connection = useRef<Socket | null>(null);
@@ -47,11 +49,18 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    store.get().then(async (saved) => {
-      setToken(saved);
-      await readProfile(saved);
+    // The address typed last time is read first, so the profile read below goes to the server
+    // that address names instead of the built-in default (D100).
+    const saved = readSetting(db, BASE_URL_KEY);
+    if (saved) {
+      setBase(saved);
+      setBaseState(saved);
+    }
+    store.get().then(async (t) => {
+      setToken(t);
+      await readProfile(t);
     });
-  }, [store, readProfile]);
+  }, [db, store, readProfile]);
 
   useEffect(() => {
     if (!token) {
@@ -77,7 +86,9 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     base,
     setBase(next: string) {
       setBase(next);
-      setBaseState(baseUrl());
+      const current = baseUrl();
+      writeSetting(db, BASE_URL_KEY, current);
+      setBaseState(current);
     },
     setOffline,
     async signIn(next: string) {

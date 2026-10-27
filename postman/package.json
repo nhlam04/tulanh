@@ -1,0 +1,12 @@
+{
+  "name": "ishop-qa",
+  "private": true,
+  "scripts": {
+    "build": "node build-collection.js",
+    "run": "node build-collection.js && node run.js"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "11.3.0",
+    "newman": "6.2.3"
+  }
+}

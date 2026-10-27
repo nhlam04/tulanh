@@ -2,1325 +2,2460 @@
   "info": {
     "name": "ishop-api",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0",
-    "description": "Built from src/routes.js, so the collection and the server list the same paths. Codes come from shared/codes.json."
+    "description": "Built from src/routes.js. The order runs auth first, so the token is set before the reads."
   },
   "item": [
     {
-      "name": "post /auth/register",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/auth/register",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "auth",
-            "register"
+      "name": "auth",
+      "item": [
+        {
+          "name": "POST /user/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"demo@mail.com\",\"password\":\"password1\",\"name\":\"Demo User\",\"username\":\"demo\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n  pm.expect(body.code).toBe('00035');\n});\nconst body = pm.response.json(); if (body.data && body.data.accessToken) pm.environment.set('token', body.data.accessToken);"
+                ]
+              }
+            }
           ]
         },
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
+        {
+          "name": "POST /user/login/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/login/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"demo@mail.com\",\"password\":\"password1\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n  pm.expect(body.code).toBe('00044');\n});\nconst body = pm.response.json(); if (body.data && body.data.accessToken) pm.environment.set('token', body.data.accessToken);"
+                ]
+              }
+            }
+          ]
         }
-      },
-      "event": []
+      ]
     },
     {
-      "name": "post /auth/code",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/auth/code",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "auth",
-            "code"
+      "name": "user",
+      "item": [
+        {
+          "name": "POST /user/logout/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/logout/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "logout"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
         },
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
+        {
+          "name": "POST /user/refresh-token/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/refresh-token/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "refresh-token"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /user/send-verification-code/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/send-verification-code/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "send-verification-code"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /user/verify-email/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/verify-email/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "verify-email"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /user/change-password/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/change-password/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "change-password"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /user/group/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/group/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "group"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /user/group/add/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/group/add/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "group",
+                "add"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /user/group/",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/group/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "group"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /user/group/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/group/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "group"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /user/devices/ (not in the spec table)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/devices/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "devices"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /user/devices/ (not in the spec table)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/devices/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "devices"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /user/export/ (not in the spec table)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/export/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "export"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /user/group/leave/ (not in the spec table)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/user/group/leave/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "user",
+                "group",
+                "leave"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
         }
-      },
-      "event": []
+      ]
     },
     {
-      "name": "post /auth/verify",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/auth/verify",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "auth",
-            "verify"
+      "name": "admin",
+      "item": [
+        {
+          "name": "POST /admin/category/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/category/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "category"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
         },
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
+        {
+          "name": "GET /admin/category/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/category/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "category"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /admin/category/",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/category/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "category"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /admin/category/",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/category/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "category"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /admin/unit/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/unit/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "unit"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /admin/unit/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/unit/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "unit"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /admin/unit/",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/unit/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "unit"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /admin/unit/",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/unit/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "unit"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /admin/logs/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/logs/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "logs"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /admin/users/ (not in the spec table)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/users/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /admin/users/role/ (not in the spec table)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/users/role/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "role"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /admin/sessions/logout/ (not in the spec table)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/admin/sessions/logout/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "admin",
+                "sessions",
+                "logout"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
         }
-      },
-      "event": []
+      ]
     },
     {
-      "name": "post /auth/login",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/auth/login",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "auth",
-            "login"
+      "name": "food",
+      "item": [
+        {
+          "name": "POST /food/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/food/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "food"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
         },
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
+        {
+          "name": "PUT /food/",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/food/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "food"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /food/",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/food/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "food"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /food/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/food/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "food"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /food/unit/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/food/unit/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "food",
+                "unit"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /food/category/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/food/category/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "food",
+                "category"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /food/search/ (not in the spec table)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/food/search/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "food",
+                "search"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
         }
-      },
-      "event": []
+      ]
     },
     {
-      "name": "post /auth/refresh",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/auth/refresh",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "auth",
-            "refresh"
+      "name": "fridge",
+      "item": [
+        {
+          "name": "POST /fridge/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/fridge/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "fridge"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
         },
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
+        {
+          "name": "PUT /fridge/",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/fridge/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "fridge"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /fridge/",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/fridge/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "fridge"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /fridge/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/fridge/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "fridge"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /fridge/:foodName/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/fridge/:foodName/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "fridge",
+                ":foodName"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
         }
-      },
-      "event": []
+      ]
     },
     {
-      "name": "post /auth/logout",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/auth/logout",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "auth",
-            "logout"
+      "name": "shopping",
+      "item": [
+        {
+          "name": "POST /shopping/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/shopping/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "shopping"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
         },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
+        {
+          "name": "PUT /shopping/",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/shopping/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "shopping"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /shopping/",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/shopping/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "shopping"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /shopping/task/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/shopping/task/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "shopping",
+                "task"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /shopping/task/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/shopping/task/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "shopping",
+                "task"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /shopping/task/",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/shopping/task/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "shopping",
+                "task"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /shopping/task/",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/shopping/task/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "shopping",
+                "task"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /shopping/ (not in the spec table)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/shopping/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "shopping"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /shopping/claim/ (not in the spec table)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/shopping/claim/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "shopping",
+                "claim"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /shopping/bought/ (not in the spec table)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/shopping/bought/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "shopping",
+                "bought"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
         }
-      },
-      "event": []
+      ]
     },
     {
-      "name": "get /user/profile",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/user/profile",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "user",
-            "profile"
+      "name": "meal",
+      "item": [
+        {
+          "name": "POST /meal/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/meal/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "meal"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
         },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "put /user/profile",
-      "request": {
-        "method": "PUT",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/user/profile",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "user",
-            "profile"
+        {
+          "name": "PUT /meal/",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/meal/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "meal"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
         },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
+        {
+          "name": "DELETE /meal/",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/meal/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "meal"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /meal/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/meal/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "meal"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /meal/suggested/ (not in the spec table)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/meal/suggested/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "meal",
+                "suggested"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /meal/generate-list/ (not in the spec table)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/meal/generate-list/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "meal",
+                "generate-list"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
         }
-      },
-      "event": []
+      ]
     },
     {
-      "name": "put /user/password",
-      "request": {
-        "method": "PUT",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/user/password",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "user",
-            "password"
+      "name": "recipe",
+      "item": [
+        {
+          "name": "POST /recipe/",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/recipe/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "recipe"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
         },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
+        {
+          "name": "PUT /recipe/",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/recipe/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "recipe"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /recipe/",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/recipe/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "recipe"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /recipe/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/recipe/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "recipe"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /recipe/:foodId/",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/recipe/:foodId/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "recipe",
+                ":foodId"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /recipe/ingredients/ (not in the spec table)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/recipe/ingredients/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "recipe",
+                "ingredients"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
+          ]
         }
-      },
-      "event": []
+      ]
     },
     {
-      "name": "delete /user",
-      "request": {
-        "method": "DELETE",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/user",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "user"
+      "name": "sync",
+      "item": [
+        {
+          "name": "POST /sync/ (not in the spec table)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/sync/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "sync"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
         }
-      },
-      "event": []
+      ]
     },
     {
-      "name": "get /user/export",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/user/export",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "user",
-            "export"
+      "name": "consumption",
+      "item": [
+        {
+          "name": "POST /consumption/ (not in the spec table)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/consumption/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "consumption"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "post /user/devices",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/user/devices",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "user",
-            "devices"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
         }
-      },
-      "event": []
+      ]
     },
     {
-      "name": "get /user/devices",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/user/devices",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "user",
-            "devices"
+      "name": "reports",
+      "item": [
+        {
+          "name": "GET /reports/purchases/ (not in the spec table)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/reports/purchases/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "reports",
+                "purchases"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
         },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "post /groups",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/groups",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "groups"
+        {
+          "name": "GET /reports/consumption/ (not in the spec table)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/reports/consumption/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "reports",
+                "consumption"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
         }
-      },
-      "event": []
+      ]
     },
     {
-      "name": "post /groups/members",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/groups/members",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "groups",
-            "members"
+      "name": "uploads",
+      "item": [
+        {
+          "name": "POST /uploads/ (not in the spec table)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "http://127.0.0.1:5000/it4788/uploads/",
+              "protocol": "http",
+              "host": [
+                "127.0.0.1"
+              ],
+              "path": [
+                "uploads"
+              ]
+            },
+            "header": [
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort()).toEqual(['code', 'data', 'message']);\n});"
+                ]
+              }
+            }
           ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
         }
-      },
-      "event": []
-    },
-    {
-      "name": "delete /groups/members",
-      "request": {
-        "method": "DELETE",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/groups/members",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "groups",
-            "members"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "get /groups/members",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/groups/members",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "groups",
-            "members"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "post /groups/leave",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/groups/leave",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "groups",
-            "leave"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "post /categories",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/categories",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "categories"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "get /categories",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/categories",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "categories"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "post /units",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/units",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "units"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "get /units",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/units",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "units"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "post /foods",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/foods",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "foods"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "get /foods",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/foods",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "foods"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "get /foods/search",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/foods/search",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "foods",
-            "search"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "put /foods",
-      "request": {
-        "method": "PUT",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/foods",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "foods"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "delete /foods",
-      "request": {
-        "method": "DELETE",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/foods",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "foods"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "post /fridge",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/fridge",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "fridge"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "get /fridge",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/fridge",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "fridge"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "get /fridge/byFood",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/fridge/byFood",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "fridge",
-            "byFood"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "put /fridge",
-      "request": {
-        "method": "PUT",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/fridge",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "fridge"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "delete /fridge",
-      "request": {
-        "method": "DELETE",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/fridge",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "fridge"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "post /shopping/tasks",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/shopping/tasks",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "shopping",
-            "tasks"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "post /shopping/claim",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/shopping/claim",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "shopping",
-            "claim"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "post /shopping/bought",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/shopping/bought",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "shopping",
-            "bought"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "post /consumption",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/consumption",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "consumption"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "get /reports/purchases",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/reports/purchases",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "reports",
-            "purchases"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "get /reports/consumption",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/reports/consumption",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "reports",
-            "consumption"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "post /meal-plans",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/meal-plans",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "meal-plans"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "get /meal-plans",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/meal-plans",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "meal-plans"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "put /meal-plans",
-      "request": {
-        "method": "PUT",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/meal-plans",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "meal-plans"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "delete /meal-plans",
-      "request": {
-        "method": "DELETE",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/meal-plans",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "meal-plans"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "get /meal-plans/suggested",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/meal-plans/suggested",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "meal-plans",
-            "suggested"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "post /meal-plans/generate-list",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/meal-plans/generate-list",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "meal-plans",
-            "generate-list"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "post /recipes",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/recipes",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "recipes"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "get /recipes",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/recipes",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "recipes"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "put /recipes",
-      "request": {
-        "method": "PUT",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/recipes",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "recipes"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "post /recipes/ingredients",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/recipes/ingredients",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "recipes",
-            "ingredients"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "post /sync",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/sync",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "sync"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "get /admin/users",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/admin/users",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "admin",
-            "users"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
-    },
-    {
-      "name": "post /admin/users/role",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/admin/users/role",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "admin",
-            "users",
-            "role"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "post /admin/sessions/logout",
-      "request": {
-        "method": "POST",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/admin/sessions/logout",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "admin",
-            "sessions",
-            "logout"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{}"
-        }
-      },
-      "event": []
-    },
-    {
-      "name": "get /admin/logs",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "http://127.0.0.1:5000/it4788/admin/logs",
-          "host": [
-            "http://127.0.0.1"
-          ],
-          "path": [
-            "admin",
-            "logs"
-          ]
-        },
-        "header": [
-          {
-            "key": "authorization",
-            "value": "Bearer {{token}}"
-          }
-        ]
-      },
-      "event": []
+      ]
     }
   ]
 }

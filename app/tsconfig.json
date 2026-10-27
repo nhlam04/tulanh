@@ -15,7 +15,9 @@
   },
   "include": [
     "src",
+    "app",
     "test",
     "../shared"
-  ]
+  ],
+  "extends": "expo/tsconfig.base"
 }

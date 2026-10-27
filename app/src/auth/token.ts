@@ -6,13 +6,14 @@ export type TokenStore = {
   clear(): Promise<void>;
 };
 
-// In the app, `keychain` is react-native-keychain. A test passes a plain object.
+// In the app, `keychain` is react-native-keychain. A test passes a plain object. The write
+// calls answer with whatever the key store reports; the rule only needs the call to happen.
 export function tokenStore(keychain: {
   getGenericPassword: (options: { service: string }) => Promise<{ password: string } | false>;
-  setGenericPassword: (user: string, password: string, options: { service: string }) => Promise<boolean>;
-  resetGenericPassword: (options: { service: string }) => Promise<boolean>;
+  setGenericPassword: (user: string, password: string, options: { service: string }) => Promise<unknown>;
+  resetGenericPassword: (options: { service: string }) => Promise<unknown>;
 }): TokenStore {
-  const service = 'ishop-token';
+  const service = 'tulanh-token';
   return {
     async get() {
       const row = await keychain.getGenericPassword({ service });

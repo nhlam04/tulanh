@@ -1,14 +1,26 @@
 {
-  "name": "ishop",
-  "slug": "ishop",
-  "scheme": "ishop",
+  "name": "Tủ Lành",
+  "slug": "tulanh",
+  "scheme": "tulanh",
   "version": "1.0.0",
   "orientation": "portrait",
   "userInterfaceStyle": "light",
-  "plugins": ["expo-notifications", "expo-sqlite"],
+  "plugins": [
+    "expo-router",
+    ["expo-notifications", { "color": "#3f7d5b" }],
+    "expo-sqlite"
+  ],
+  "android": {
+    "package": "com.tulanh.app",
+    "googleServicesFile": "./google-services.json"
+  },
+  "ios": {
+    "bundleIdentifier": "com.tulanh.app"
+  },
   "extra": {
     "eas": {
-      "projectId": ""
+      "projectId": "c79480db-f1c2-4f77-b7f6-a9f0fd81f4cc"
     }
-  }
+  },
+  "owner": "mapotofu40s-team"
 }

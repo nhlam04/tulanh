@@ -1,7 +1,9 @@
 node_modules/
 .env
 dist/
+.expo/
 .scratch_jest_probe.test.js
 postman/newman/
 logs/
 .scratch/
+.secrets/

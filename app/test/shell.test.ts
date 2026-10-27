@@ -1,7 +1,9 @@
-// App shell scope (Minh): the offline rule and the queue guard.
-import { request } from '../src/api/client';
+// App shell scope (Minh): the offline rule, the queue guard, the socket handshake.
+import { request, setBase, baseUrl, DEFAULT_BASE } from '../src/api/client';
 import { init, queueOp, pendingOps, markSent, QueueDb } from '../src/offline/queue';
 import { sendQueue } from '../src/offline/send';
+import { writeOrQueue } from '../src/offline/write';
+import type { Session } from '../src/session';
 
 function fakeDb(): QueueDb {
   const rows: Record<string, unknown>[] = [];
@@ -57,4 +59,65 @@ test('the queue posts once and marks only the ops the server took', async () => 
   global.fetch = original;
   expect(out.sent).toBe(1);
   expect(pendingOps(db).map((op) => op.requestId)).toEqual(['r2']);
+});
+
+test('a send the server refused for a session keeps the whole queue', async () => {
+  const db = fakeDb();
+  init(db);
+  queueOp(db, { id: '1', type: 'consumption', requestId: 'r1', payload: { lotId: 'x', quantity: 1 }, sentAt: null });
+  const original = global.fetch;
+  global.fetch = (async () => ({ status: 401, json: async () => ({ code: '00012', message: 'bad token', data: null }) })) as unknown as typeof fetch;
+  const out = await sendQueue(db, 'expired-token', '2026-10-26T03:02:00Z');
+  global.fetch = original;
+  expect(out.sent).toBe(0);
+  expect(pendingOps(db).map((op) => op.requestId)).toEqual(['r1']);
+});
+
+function sessionWith(db: QueueDb, offline: boolean): Session {
+  return { db, token: 'token', offline } as unknown as Session;
+}
+
+test('a write with the network off goes to the queue, not to the wire (D38)', async () => {
+  const db = fakeDb();
+  init(db);
+  const out = await writeOrQueue(sessionWith(db, true), '/consumption/', { lotId: 'x', quantity: 1 }, {
+    type: 'consumption', payload: { lotId: 'x', quantity: 1 },
+  });
+  expect(out.code).toBe('00008');
+  expect(pendingOps(db).length).toBe(1);
+  expect(pendingOps(db)[0].requestId).toBeTruthy();
+});
+
+test('a write the server never answered is queued as well', async () => {
+  const db = fakeDb();
+  init(db);
+  const original = global.fetch;
+  global.fetch = (async () => {
+    throw new Error('no route to host');
+  }) as unknown as typeof fetch;
+  const out = await writeOrQueue(sessionWith(db, false), '/consumption/', { lotId: 'x', quantity: 1 }, {
+    type: 'consumption', payload: { lotId: 'x', quantity: 1 },
+  });
+  global.fetch = original;
+  expect(out.status).toBe(0);
+  expect(pendingOps(db).length).toBe(1);
+});
+
+test('the server address is a device setting, not a build constant', () => {
+  setBase('http://10.0.0.5:5000/it4788');
+  expect(baseUrl()).toBe('http://10.0.0.5:5000/it4788');
+  setBase('   ');
+  expect(baseUrl()).toBe(DEFAULT_BASE);
+});
+
+jest.mock('socket.io-client', () => ({ io: (url: string, options: unknown) => ({ url, options }) }));
+
+test('the socket handshake carries the token, and the url is the origin', async () => {
+  const { socket } = await import('../src/realtime/socket');
+  const connection = socket.connect('http://127.0.0.1:5000/it4788', { token: 't1' }) as unknown as {
+    url: string;
+    options: { auth: { token: string } };
+  };
+  expect(connection.url).toBe('http://127.0.0.1:5000');
+  expect(connection.options.auth.token).toBe('t1');
 });

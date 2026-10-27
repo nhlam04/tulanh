@@ -12,7 +12,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-npx newman run postman/ishop.postman_collection.json \
+npx newman run postman/tulanh.postman_collection.json \
   --timeout 10000 \
   --reporter-cli-no-author \
   || { echo "collection run failed"; exit 2; }

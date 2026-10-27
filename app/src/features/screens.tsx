@@ -1,13 +1,21 @@
-// Feature screens (Hùng): the screens read the shared rules, so a message shown here
-// is the same message the server returns. Paths are written as the route table writes them.
-import { View, Text, Pressable } from 'react-native';
+// Feature screens (Hùng): the loaders read the shared paths, the lists read the kit, so
+// one row looks the same on every screen and one situation reads the same everywhere.
 import { request } from '../api/client';
 import { canEdit } from './permission';
 import { daysLeft } from './days';
+import { Empty, List, ListRow } from './ui';
 
 export { daysLeft };
 
 export type ScreenProps = { token: string | null; offline: boolean; dispatch: (items: unknown[]) => void };
+export type NameMap = Record<string, string>;
+
+// Catalog rows arrive as {_id, name}; the screens show names, so every route reads the
+// same id-to-name map from the answer it was given.
+export function namesOf(out: { data: unknown | null }, key: string): NameMap {
+  const rows = (out.data as Record<string, Record<string, unknown>[]> | null)?.[key] || [];
+  return Object.fromEntries(rows.map((row) => [String(row._id), String(row.name)]));
+}
 
 export async function loadFoods(props: ScreenProps) {
   const response = await request('/food/', { token: props.token, offline: props.offline });
@@ -60,50 +68,111 @@ export async function loadConsumption(props: ScreenProps) {
   return response;
 }
 
-// Days left lives in ./days so the rule is readable without the screens.
-
-export function FoodScreen({ items, message }: { items: Record<string, unknown>[]; message: string }) {
+// The food list reads as rows, not a run-on paragraph: the name, then the group and the
+// unit it was filed under. Names come from the catalog the screen already loaded, because
+// the server answers ids (D18).
+export function FoodScreen({ items, categories, units }: { items: Record<string, unknown>[]; categories: NameMap; units: NameMap }) {
+  if (!items.length) {
+    return <Empty title="Chưa có thực phẩm nào" hint="Thêm thực phẩm để bắt đầu ghi danh sách mua và ghi tủ." />;
+  }
   return (
-    <View>
-      <Text>{message}</Text>
+    <List>
       {items.map((row) => (
-        <Text key={String(row._id)}>{String(row.name)}</Text>
+        <ListRow
+          key={String(row._id)}
+          title={String(row.name)}
+          sub={`${categories[String(row.category_id)] || 'chưa rõ nhóm'} · ${units[String(row.unit_id)] || 'chưa rõ đơn vị'}`}
+        />
       ))}
-    </View>
+    </List>
   );
 }
 
-// The fridge screen names the food, not the lot id, and shows the days left like the notice.
-// The row offers the one write the screen owns: recording that the lot was used.
-export function FridgeScreen({ items, names, message, onUse }: { items: Record<string, unknown>[]; names: Record<string, string>; message: string; onUse?: (lotId: string) => void }) {
+// Days left lives in ./days so the rule is readable without the screens. The row offers the
+// one write it owns: recording that the lot was used. A lot at or past its date is marked
+// red, the colour meaning the course asks for (rule 2).
+export function FridgeScreen({ items, names, units, onUse }: { items: Record<string, unknown>[]; names: NameMap; units: NameMap; onUse?: (lotId: string) => void }) {
+  if (!items.length) {
+    return <Empty title="Tủ đang trống" hint="Thêm thực phẩm đã mua vào tủ để được nhắc trước khi hết hạn." />;
+  }
   return (
-    <View>
-      <Text>{message}</Text>
+    <List>
       {items.map((lot) => {
         const left = daysLeft(String(lot.use_until || ''));
+        const due = left === null ? 'chưa rõ ngày dùng' : left <= 0 ? 'hết hạn hôm nay' : `còn ${left} ngày`;
         return (
-          <Pressable key={String(lot._id)} onPress={() => onUse?.(String(lot._id))} disabled={!onUse}>
-            <Text>
-              {names[String(lot.food_id)] || 'món trong tủ'} — {String(lot.quantity)} — còn {left === null ? '?' : left} ngày
-            </Text>
-          </Pressable>
+          <ListRow
+            key={String(lot._id)}
+            title={names[String(lot.food_id)] || 'món trong tủ'}
+            sub={`${String(lot.quantity)} ${units[String(lot.unit_id)] || ''} · ${due}`}
+            warn={left !== null && left <= 0}
+            action={onUse ? 'Đã dùng' : undefined}
+            onPress={onUse ? () => onUse(String(lot._id)) : undefined}
+            disabled={!onUse}
+          />
         );
       })}
-    </View>
+    </List>
   );
 }
 
-// Rule C in the client: hide the edit control for a row the caller does not own.
-
-export function ShoppingScreen({ items, userId, role, message }: { items: Record<string, unknown>[]; userId: string; role: string; message: string }) {
+// Rule C in the client: the edit control only appears on a row the caller may write.
+// The row offers one action at a time — take the task, or mark it bought — never two side
+// by side, so a tap cannot land on the wrong one.
+export function ShoppingScreen({ items, names, userId, role, onClaim, onBought }: { items: Record<string, unknown>[]; names: NameMap; userId: string; role: string; onClaim?: (taskId: string) => void; onBought?: (taskId: string) => void }) {
+  if (!items.length) {
+    return <Empty title="Chưa có món nào trong danh sách" hint="Thêm món vào danh sách hiện có, hoặc tạo danh sách mới." />;
+  }
   return (
-    <View>
-      <Text>{message}</Text>
-      {items.map((task) => (
-        <Pressable key={String(task._id)} disabled={!canEdit(task, userId, role)}>
-          <Text>{String(task.quantity)} — {canEdit(task, userId, role) ? 'edit' : 'read'}</Text>
-        </Pressable>
+    <List>
+      {items.map((task) => {
+        const claimed = task.claimed_by ? String(task.claimed_by) : '';
+        const bought = task.bought_at ? String(task.bought_at) : '';
+        const mine = claimed === userId;
+        return (
+          <ListRow
+            key={String(task._id)}
+            title={names[String(task.food_id)] || 'món trong danh sách'}
+            sub={bought ? 'đã mua' : claimed ? `đã nhận: ${claimed}` : `Số lượng ${String(task.quantity)} · chưa ai nhận`}
+            action={bought ? undefined : mine || !claimed ? 'Đã mua' : 'Nhận phần này'}
+            onPress={bought ? undefined : mine || !claimed ? (onBought ? () => onBought(String(task._id)) : undefined) : (onClaim ? () => onClaim(String(task._id)) : undefined)}
+            disabled={bought ? true : !(bought || mine || !claimed) ? true : !canEdit(task, userId, role)}
+          />
+        );
+      })}
+    </List>
+  );
+}
+
+// The suggested meals name the recipe and the food already in the tủ, not the ids.
+export function MealScreen({ items, names }: { items: Record<string, unknown>[]; names: NameMap }) {
+  if (!items.length) {
+    return <Empty title="Tủ chưa gợi ý được món nào" hint="Thêm thực phẩm vào tủ; món gợi ý đến từ những gì đang có." />;
+  }
+  return (
+    <List>
+      {items.map((meal) => (
+        <ListRow
+          key={String(meal.recipe_id)}
+          title={String(meal.name)}
+          sub={(meal.ingredients as string[])?.map((id) => names[id] || id).join(', ') || 'không rõ nguyên liệu'}
+        />
       ))}
-    </View>
+    </List>
+  );
+}
+
+export type ReportGroup = { name: string; rows: unknown[] };
+
+export function ReportScreen({ groups, label }: { groups: ReportGroup[]; label: string }) {
+  if (!groups.length) {
+    return <Empty title={`${label}: chưa có số liệu`} hint="Số liệu đến từ các lượt mua và các lượt dùng đã ghi." />;
+  }
+  return (
+    <List>
+      {groups.map((group) => (
+        <ListRow key={group.name} title={group.name} sub={`${group.rows.length} lượt`} />
+      ))}
+    </List>
   );
 }

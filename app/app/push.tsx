@@ -1,25 +1,26 @@
 // Push route (Hùng): the Route A proof kept as a screen. It asks for permission, reads the
-// Expo push token, posts the device so the server can notify this phone, and prints every
-// notice that arrives. Replacing the old entry file, which held no feature rule.
+// Expo push token, posts the device so the server can notify this phone, and lists every
+// notice that arrives. A proof surface, so it is reached from Thống kê, not from the tabs.
 import { useEffect, useState } from 'react';
-import { ScrollView, Text } from 'react-native';
+import { View } from 'react-native';
+import { router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
-import { request, messageFor } from '../src/api/client';
+import { notice, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { deviceId } from '../src/features/deviceId';
 import { registerPushToken, renderNotification } from '../src/features/push';
-import { Button, styles } from '../src/features/ui';
+import { Bar, Button, List, ListRow, Notice, Screen, styles } from '../src/features/ui';
 
 export default function PushRoute() {
   const session = useSession();
-  const [status, setStatus] = useState('đang mở tủ lành…');
+  const [note, setNote] = useState<Note>({ text: 'đang mở tủ lành…', bad: false });
   const [token, setToken] = useState('—');
   const [notices, setNotices] = useState<string[]>([]);
 
   async function readToken() {
     await Notifications.requestPermissionsAsync();
     const result = await registerPushToken();
-    setStatus(result.code === '00383' ? 'tủ lành của bạn đã mở' : `${result.code} — ${result.message || messageFor(result.code)}`);
+    setNote(result.token ? { text: 'tủ lành của bạn đã mở', bad: false } : { text: result.message || 'chưa mở được thông báo', bad: true });
     setToken(result.token ? String(result.token) : '—');
     if (!result.token || !session.token) return;
     const device = await request('/user/devices/', {
@@ -27,7 +28,7 @@ export default function PushRoute() {
       body: { deviceId: await deviceId(), platform: 'android', pushToken: String(result.token) },
       token: session.token,
     });
-    setStatus(`${device.code} — ${device.message || messageFor(device.code)}`);
+    setNote(notice(device));
   }
 
   useEffect(() => {
@@ -40,14 +41,17 @@ export default function PushRoute() {
   }, [session.token]);
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={{ gap: 10 }}>
-      <Text style={styles.title}>Thông báo</Text>
-      <Text>{status}</Text>
-      <Text selectable>{token}</Text>
-      <Button label="Đọc lại token" onPress={readToken} />
-      {notices.map((line, index) => (
-        <Text key={index}>{line}</Text>
-      ))}
-    </ScrollView>
+    <View style={styles.shell}>
+      <Bar title="Thông báo" sub="đường dây nhắc hết hạn" />
+      <Screen>
+        <Notice note={note} />
+        <ListRow title="Token của máy" sub={token} />
+        {notices.length ? (
+          <List>{notices.map((line, index) => <ListRow key={index} title={line} />)}</List>
+        ) : null}
+        <Button label="Đọc lại token" onPress={readToken} />
+        <Button label="Về thống kê" onPress={() => router.push('/stats')} outline />
+      </Screen>
+    </View>
   );
 }

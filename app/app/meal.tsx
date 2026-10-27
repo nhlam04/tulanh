@@ -1,25 +1,26 @@
 // Meal screen (Hùng): the meals the tủ lành can cook now, and the list for a planned date.
 import { useEffect, useState } from 'react';
-import { ScrollView, Text } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
-import { request, messageFor } from '../src/api/client';
+import { notice, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
-import { loadMeals } from '../src/features/screens';
-import { Button, Field, styles } from '../src/features/ui';
+import { MealScreen, loadMeals, namesOf } from '../src/features/screens';
+import { Bar, Button, Field, Notice, Screen, TabBar, styles } from '../src/features/ui';
 
 export default function MealRoute() {
   const session = useSession();
   const [meals, setMeals] = useState<Record<string, unknown>[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [message, setMessage] = useState('Tủ lành của bạn');
+  const [note, setNote] = useState<Note>({ text: '', bad: false });
 
   async function reload() {
-    const foods = await request('/food/', { token: session.token });
-    const rows = (foods.data as { foods: Record<string, unknown>[] })?.foods || [];
-    setNames(Object.fromEntries(rows.map((row) => [String(row._id), String(row.name)])));
-    const out = await loadMeals({ token: session.token, offline: false, dispatch: (rows) => setMeals(rows as Record<string, unknown>[]) });
-    setMessage(`${out.code} — ${out.message || messageFor(out.code)}`);
+    const [foods, out] = await Promise.all([
+      request('/food/', { token: session.token }),
+      loadMeals({ token: session.token, offline: false, dispatch: (rows) => setMeals(rows as Record<string, unknown>[]) }),
+    ]);
+    setNames(namesOf(foods, 'foods'));
+    setNote(notice(out));
   }
 
   useEffect(() => {
@@ -27,23 +28,26 @@ export default function MealRoute() {
   }, [session.token, session.base]);
 
   async function generate() {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      setNote({ text: 'Ngày dự kiến phải viết dạng YYYY-MM-DD', bad: true });
+      return;
+    }
     const out = await request('/meal/generate-list/', { method: 'post', body: { date }, token: session.token });
-    setMessage(`${out.code} — ${out.message || messageFor(out.code)}`);
+    setNote(notice(out));
     if (out.code === '00393') router.push('/shopping');
   }
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={{ gap: 10 }}>
-      <Text style={styles.title}>Bữa ăn từ tủ lành</Text>
-      <Text>{message}</Text>
-      {meals.map((meal) => (
-        <Text key={String(meal.recipe_id)}>
-          {String(meal.name)} — {(meal.ingredients as string[])?.map((id) => names[id] || id).join(', ')}
-        </Text>
-      ))}
-      <Field label="Ngày dự kiến (YYYY-MM-DD)" value={date} onChangeText={setDate} />
-      <Button label="Lập danh sách mua" onPress={generate} />
-      <Button label="Xem thống kê" onPress={() => router.push('/stats')} />
-    </ScrollView>
+    <View style={styles.shell}>
+      <Bar title="Bữa ăn" sub="gợi ý từ gì đang có trong tủ" />
+      <Screen>
+        <Notice note={note} />
+        <MealScreen items={meals} names={names} />
+        <Field label="Ngày dự kiến" value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" />
+        <Button label="Lập danh sách mua" onPress={generate} />
+        <Button label="Đọc lại gợi ý" onPress={reload} outline />
+      </Screen>
+      <TabBar current="/meal" go={(path) => router.push(path)} />
+    </View>
   );
 }

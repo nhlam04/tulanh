@@ -1,25 +1,26 @@
 // Statistics screen (Hùng): what the group bought, and why the tủ emptied.
 // The report arrives keyed by name, so the screen reads the keys it was given.
 import { useEffect, useState } from 'react';
-import { ScrollView, Text } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
-import { messageFor } from '../src/api/client';
+import { notice, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
-import { loadConsumption, loadStats } from '../src/features/screens';
-import { Button, styles } from '../src/features/ui';
-
-type Group = { name: string; rows: unknown[] };
+import { ReportScreen, loadConsumption, loadStats, type ReportGroup } from '../src/features/screens';
+import { Bar, Button, Notice, Screen, TabBar, styles } from '../src/features/ui';
 
 export default function StatsRoute() {
   const session = useSession();
-  const [bought, setBought] = useState<Group[]>([]);
-  const [used, setUsed] = useState<Group[]>([]);
-  const [message, setMessage] = useState('Tủ lành của bạn');
+  const [bought, setBought] = useState<ReportGroup[]>([]);
+  const [used, setUsed] = useState<ReportGroup[]>([]);
+  const [note, setNote] = useState<Note>({ text: '', bad: false });
 
   async function reload() {
-    const purchases = await loadStats({ token: session.token, offline: false, dispatch: (rows) => setBought(rows as Group[]) });
-    const consumption = await loadConsumption({ token: session.token, offline: false, dispatch: (rows) => setUsed(rows as Group[]) });
-    setMessage(`${purchases.code} — ${purchases.message || messageFor(purchases.code)} · ${consumption.code}`);
+    const [purchases, consumption] = await Promise.all([
+      loadStats({ token: session.token, offline: false, dispatch: (rows) => setBought(rows as ReportGroup[]) }),
+      loadConsumption({ token: session.token, offline: false, dispatch: (rows) => setUsed(rows as ReportGroup[]) }),
+    ]);
+    const failed = [purchases, consumption].find((out) => out.status === 0 || out.status >= 400);
+    setNote(notice(failed || purchases));
   }
 
   useEffect(() => {
@@ -27,19 +28,16 @@ export default function StatsRoute() {
   }, [session.token, session.base]);
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={{ gap: 10 }}>
-      <Text style={styles.title}>Thống kê</Text>
-      <Text>{message}</Text>
-      <Text style={styles.muted}>đã mua theo nhóm thực phẩm</Text>
-      {bought.map((group) => (
-        <Text key={`b-${group.name}`}>{group.name}: {group.rows.length}</Text>
-      ))}
-      <Text style={styles.muted}>đã dùng theo lý do</Text>
-      {used.map((group) => (
-        <Text key={`u-${group.name}`}>{group.name}: {group.rows.length}</Text>
-      ))}
-      <Button label="Đọc lại" onPress={reload} />
-      <Button label="Thông báo" onPress={() => router.push('/push')} />
-    </ScrollView>
+    <View style={styles.shell}>
+      <Bar title="Thống kê" sub="mua và dùng trong nhóm" />
+      <Screen>
+        <Notice note={note} />
+        <ReportScreen groups={bought} label="Đã mua" />
+        <ReportScreen groups={used} label="Đã dùng" />
+        <Button label="Đọc lại" onPress={reload} outline />
+        <Button label="Thông báo" onPress={() => router.push('/push')} outline />
+      </Screen>
+      <TabBar current="/stats" go={(path) => router.push(path)} />
+    </View>
   );
 }

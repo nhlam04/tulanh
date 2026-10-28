@@ -39,6 +39,12 @@ export default function GroupScreen() {
         <Notice note={note} />
         <Field label="Tên nhóm" value={groupName} onChangeText={setGroupName} placeholder="ví dụ: Nhà mình" />
         <Button label="Tạo nhóm" onPress={createGroup} />
+        {/* A session can go stale while this screen is open, so the way out is on the screen
+            and reads the same as the way out on Thống kê (rule 2 and rule 3). */}
+        <Button label="Thoát đăng nhập" outline onPress={async () => {
+          await session.signOut();
+          router.replace('/');
+        }} />
       </Screen>
     </View>
   );

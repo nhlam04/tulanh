@@ -17,11 +17,12 @@ export function namesOf(out: { data: unknown | null }, key: string): NameMap {
   return Object.fromEntries(rows.map((row) => [String(row._id), String(row.name)]));
 }
 
-// Member rows come back with `id` and `username`, so a claimed row can name the person
-// instead of printing the row id (rule 9: an id on screen is code, not language).
+// Member rows come back with `id`, `name` and `username`. A claimed row names the person
+// with the name they chose for themselves; the username is an account key, so it is only a
+// fallback for an account that has no name (rule 2 and rule 9).
 export function peopleOf(out: { data: unknown | null }): NameMap {
   const rows = (out.data as { members?: Record<string, unknown>[] } | null)?.members || [];
-  return Object.fromEntries(rows.map((row) => [String(row.id), String(row.username || row.name || '')]));
+  return Object.fromEntries(rows.map((row) => [String(row.id), String(row.name || row.username || '')]));
 }
 
 export async function loadMembers(props: ScreenProps) {

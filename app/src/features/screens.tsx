@@ -67,16 +67,26 @@ export async function loadMeals(props: ScreenProps) {
   return response;
 }
 
+// The day's plans come back as one row per meal slot the group set (sáng, trưa, tối).
+export async function loadPlans(props: ScreenProps, date: string) {
+  const response = await request(`/meal/?date=${encodeURIComponent(date)}`, { token: props.token, offline: props.offline });
+  props.dispatch((response.data as { plans?: unknown[] })?.plans || []);
+  return response;
+}
+
 // The report comes back keyed by category, so the screen reads the keys, not a fixed name.
-export async function loadStats(props: ScreenProps) {
-  const response = await request('/reports/purchases/', { token: props.token, offline: props.offline });
+// The spec reads over a period, so both loaders pass optional `from`/`to` days.
+export async function loadStats(props: ScreenProps, from = '', to = '') {
+  const query = `?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+  const response = await request(`/reports/purchases/${query}`, { token: props.token, offline: props.offline });
   const report = (response.data as { report: Record<string, unknown[]> })?.report || {};
   props.dispatch(Object.keys(report).map((name) => ({ name, rows: report[name] })));
   return response;
 }
 
-export async function loadConsumption(props: ScreenProps) {
-  const response = await request('/reports/consumption/', { token: props.token, offline: props.offline });
+export async function loadConsumption(props: ScreenProps, from = '', to = '') {
+  const query = `?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`;
+  const response = await request(`/reports/consumption/${query}`, { token: props.token, offline: props.offline });
   const report = (response.data as { report: Record<string, unknown[]> })?.report || {};
   props.dispatch(Object.keys(report).map((name) => ({ name, rows: report[name] })));
   return response;
@@ -115,13 +125,14 @@ export function FridgeScreen({ items, names, units, onUse }: { items: Record<str
         const left = daysLeft(String(lot.use_until || ''));
         const empty = Number(lot.quantity) <= 0;
         const due = left === null ? 'chưa rõ ngày dùng' : left <= 0 ? 'hết hạn hôm nay' : `còn ${left} ngày`;
+        const place = lot.location ? ` · ${String(lot.location)}` : '';
         return (
           <ListRow
             key={String(lot._id)}
             title={names[String(lot.food_id)] || 'món trong tủ'}
             // An empty part states it is empty and offers nothing: the tap that would ask
             // the server for more of it is not there to make (rule 5).
-            sub={empty ? 'đã dùng hết' : `${String(lot.quantity)} ${units[String(lot.unit_id)] || ''} · ${due}`}
+            sub={empty ? 'đã dùng hết' : `${String(lot.quantity)} ${units[String(lot.unit_id)] || ''} · ${due}${place}`}
             warn={empty || (left !== null && left <= 0)}
             action={onUse && !empty ? 'Đã dùng' : undefined}
             onPress={onUse && !empty ? () => onUse(String(lot._id)) : undefined}

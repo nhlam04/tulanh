@@ -45,6 +45,11 @@ export default function MealRoute() {
         <MealScreen items={meals} names={names} />
         <Field label="Ngày dự kiến" value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" />
         <Button label="Lập danh sách mua" onPress={generate} />
+        {/* Scheduling is the spec's "Lên lịch bữa ăn", one job per screen (rule 8), so it
+            gets its own screen reached from here, like the fridge reaches its add screen. */}
+        <Button label="Kế hoạch bữa ăn" onPress={() => router.push('/meal-plan')} outline />
+        {/* Recipes feed the suggestions above, so their home is one tap away on the same tab. */}
+        <Button label="Công thức" onPress={() => router.push('/recipe')} outline />
         <Button label="Đọc lại gợi ý" onPress={reload} outline />
       </Screen>
       <TabBar current="/meal" go={(path) => router.push(path)} />

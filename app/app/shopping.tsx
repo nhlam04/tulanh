@@ -77,6 +77,9 @@ export default function ShoppingRoute() {
         <Field label="Tên danh sách mới" value={listName} onChangeText={setListName} placeholder="ví dụ: chợ hôm nay" />
         <Button label="Tạo danh sách" onPress={createList} />
         <Button label="Thêm món vào danh sách" onPress={() => router.push('/shopping-add')} outline />
+        {/* The spec asks the list to be easy to edit, and editing is its own screen like
+            adding is, so the row on this tab keeps its one action (rule 8). */}
+        <Button label="Sửa món trong danh sách" onPress={() => router.push('/shopping-edit')} outline />
         <Button label="Đọc lại" onPress={reload} outline />
       </Screen>
       <TabBar current="/shopping" go={(path) => router.push(path)} />

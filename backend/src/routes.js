@@ -60,6 +60,7 @@ const routes = [
   ['put', '/recipe/', 'recipe.updateRecipe', true, true, true],
   ['delete', '/recipe/', 'recipe.deleteRecipe', true, true, true],
   ['get', '/recipe/', 'recipe.listRecipes', false, true, true],
+  ['get', '/recipe/ingredients/', 'recipe.recipeIngredients', false, true, false],
   ['get', '/recipe/:foodId/', 'recipe.recipesByFood', false, true, true],
   ['get', '/food/search/', 'food.searchFood', false, true, false],
   ['post', '/sync/', 'sync.applyOps', true, true, false],

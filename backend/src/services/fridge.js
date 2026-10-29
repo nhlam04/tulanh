@@ -17,6 +17,9 @@ async function createLot(deps, ctx) {
     quantity: Number(ctx.input.quantity),
     unit_id: food.unit_id,
     note: ctx.input.note || null,
+    // The spec asks where in the tủ the food sits, so the lot carries a location the app
+    // taps from a fixed set of fridge places, null when the person does not name one.
+    location: ctx.input.location || null,
     notified_on: null,
     created_by: ctx.userId,
     created_at: deps.now(),
@@ -34,6 +37,7 @@ async function updateLot(deps, ctx) {
   if (ctx.input.newQuantity !== undefined) patch.quantity = Number(ctx.input.newQuantity);
   if (ctx.input.newNote !== undefined) patch.note = ctx.input.newNote;
   if (ctx.input.newUseWithin !== undefined) patch.use_until = ctx.input.newUseWithin;
+  if (ctx.input.newLocation !== undefined) patch.location = ctx.input.newLocation;
   if (!Object.keys(patch).length) return { code: '00204x' };
   patch.updated_at = deps.now();
   const updated = await deps.repos.fridge_lots.updateOne({ _id: lot._id }, patch);

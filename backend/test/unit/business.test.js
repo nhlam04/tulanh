@@ -34,6 +34,20 @@ describe('name rules and lot model', () => {
     expect(same.code).toBe('00199');
   });
 
+  test('a lot carries the place it sits in the tủ, and the place can change (spec: vị trí lưu trữ)', async () => {
+    const deps = seed();
+    const ctx = { userId: 'u1', role: 'group_leader', groupId: 'g1' };
+    const row = await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'ca', created_by: 'u1' });
+    const created = await fridge.createLot(deps, { ...ctx, input: { foodId: row._id, quantity: 2, useUntil: '2026-10-30', location: 'ngăn đá' } });
+    expect(created.code).toBe('00202');
+    expect(created.data.lot.location).toBe('ngăn đá');
+    const plain = await fridge.createLot(deps, { ...ctx, input: { foodId: row._id, quantity: 1, useUntil: '2026-11-02' } });
+    expect(plain.data.lot.location).toBe(null);
+    const moved = await fridge.updateLot(deps, { ...ctx, input: { lotId: created.data.lot._id, newLocation: 'cửa tủ' } });
+    expect(moved.code).toBe('00216');
+    expect(moved.data.lot.location).toBe('cửa tủ');
+  });
+
   test('search matches the whole stemmed word, not a substring (D76)', async () => {
     const deps = seed();
     const ctx = { userId: 'u1', role: 'user', groupId: 'g1' };
@@ -93,6 +107,27 @@ describe('bought path and consumption', () => {
     expect(waste.code).toBe('00396');
     expect(purchases.data.report.rau.length).toBe(1);
     expect(waste.data.report.cook.length).toBe(1);
+  });
+
+  test('a report over a period keeps only the days inside it (spec: khoảng thời gian nhất định)', async () => {
+    const deps = seed();
+    await deps.repos.categories.insertOne({ _id: 'c1', name: 'rau' });
+    await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'tao', category_id: 'c1' });
+    await deps.repos.shopping_lists.insertOne({ _id: 'l1', group_id: 'g1' });
+    await deps.repos.shopping_tasks.insertOne({ _id: 't1', list_id: 'l1', food_id: 'f1', quantity: 2, bought_at: new Date('2026-10-20T09:00:00Z') });
+    await deps.repos.shopping_tasks.insertOne({ _id: 't2', list_id: 'l1', food_id: 'f1', quantity: 3, bought_at: new Date('2026-10-25T09:00:00Z') });
+    await deps.repos.consumption_events.insertOne({ _id: 'e1', group_id: 'g1', food_id: 'f1', quantity: 1, reason: 'cook', logged_at: new Date('2026-10-21T04:00:00Z') });
+    await deps.repos.consumption_events.insertOne({ _id: 'e2', group_id: 'g1', food_id: 'f1', quantity: 1, reason: 'spoil', logged_at: new Date('2026-10-26T04:00:00Z') });
+    const inWindow = await report.purchasesByCategory(deps, { userId: 'u1', groupId: 'g1', input: { from: '2026-10-21', to: '2026-10-25' } });
+    expect(inWindow.data.report.rau.length).toBe(1);
+    expect(inWindow.data.report.rau[0].task_id).toBe('t2');
+    const outOfWindow = await report.purchasesByCategory(deps, { userId: 'u1', groupId: 'g1', input: { from: '2026-11-01' } });
+    expect(Object.keys(outOfWindow.data.report).length).toBe(0);
+    const reasons = await report.consumptionByReason(deps, { userId: 'u1', groupId: 'g1', input: { to: '2026-10-24' } });
+    expect(Object.keys(reasons.data.report)).toEqual(['cook']);
+    // Both ends of the window are inclusive.
+    const edge = await report.consumptionByReason(deps, { userId: 'u1', groupId: 'g1', input: { from: '2026-10-26' } });
+    expect(Object.keys(edge.data.report)).toEqual(['spoil']);
   });
 });
 
@@ -236,6 +271,24 @@ describe('the CRUD paths that the spec lists', () => {
     await recipe.addIngredients(deps, { ...ctx, input: { recipeId: 'r1', ingredients: [{ foodName: 'tao', quantity: 1 }] } });
     expect((await recipe.recipesByFood(deps, { ...ctx, input: { foodId: 'f1' } })).data.recipes.length).toBe(1);
     expect((await recipe.deleteRecipe(deps, { ...ctx, input: { recipeId: 'r1' } })).code).toBe('00376');
+  });
+
+  test('a recipe reads its ingredients with names, and only its own (code 00400)', async () => {
+    const deps = seed();
+    const ctx = { userId: 'u1', role: 'user', groupId: 'g1' };
+    await deps.repos.foods.insertOne({ _id: 'f1', group_id: 'g1', name: 'tao', created_by: 'u1' });
+    await deps.repos.foods.insertOne({ _id: 'f2', group_id: 'g1', name: 'sua', created_by: 'u1' });
+    await deps.repos.recipes.insertOne({ _id: 'r1', group_id: 'g1', name: 'sinh to tao', created_by: 'u1' });
+    await deps.repos.recipes.insertOne({ _id: 'r2', group_id: 'g1', name: 'tra sua', created_by: 'u1' });
+    await recipe.addIngredients(deps, { ...ctx, input: { recipeId: 'r1', ingredients: [{ foodName: 'tao' }, { foodName: 'sua' }] } });
+    await recipe.addIngredients(deps, { ...ctx, input: { recipeId: 'r2', ingredients: [{ foodName: 'sua' }] } });
+    const out = await recipe.recipeIngredients(deps, { ...ctx, input: { recipeId: 'r1' } });
+    expect(out.code).toBe('00400');
+    expect(out.data.ingredients.map((row) => row.name).sort()).toEqual(['sua', 'tao']);
+    // A row from another recipe stays out of the answer.
+    expect((await recipe.recipeIngredients(deps, { ...ctx, input: { recipeId: 'r2' } })).data.ingredients.length).toBe(1);
+    // A recipe nobody stored is not a recipe of this group.
+    expect((await recipe.recipeIngredients(deps, { ...ctx, input: { recipeId: 'nope' } })).code).toBe('00367');
   });
 
   test('the image rule keeps the stored path and the size cap (D13, code 00158)', async () => {

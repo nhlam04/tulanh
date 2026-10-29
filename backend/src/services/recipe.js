@@ -43,6 +43,21 @@ async function listRecipes(deps, ctx) {
   return { code: '00378', data: { recipes: await deps.repos.recipes.find({ group_id: ctx.groupId }) } };
 }
 
+// The recipe screen needs the link read the other way: one recipe's ingredients, with the
+// food names joined in, so a row reads "cà chua · gạo" and not a pile of ids (rule 2).
+async function recipeIngredients(deps, ctx) {
+  if (!ctx.groupId) return { code: '00345' };
+  const recipe = await deps.repos.recipes.findOne({ _id: ctx.input.recipeId });
+  if (!recipe || String(recipe.group_id) !== String(ctx.groupId)) return { code: '00367' };
+  const rows = await deps.repos.ingredients.find({ recipe_id: recipe._id });
+  const ingredients = [];
+  for (const row of rows) {
+    const food = await deps.repos.foods.findOne({ _id: row.food_id });
+    ingredients.push({ foodId: row.food_id, name: food ? food.name : null, quantity: Number(row.quantity || 1) });
+  }
+  return { code: '00400', data: { ingredients } };
+}
+
 async function updateRecipe(deps, ctx) {
   const recipe = await deps.repos.recipes.findOne({ _id: ctx.input.recipeId });
   if (!recipe) return { code: '00367' };
@@ -72,4 +87,4 @@ async function recipesByFood(deps, ctx) {
   return { code: '00348', data: { recipes } };
 }
 
-module.exports = { createRecipe, addIngredients, listRecipes, updateRecipe, deleteRecipe, recipesByFood };
+module.exports = { createRecipe, addIngredients, listRecipes, recipeIngredients, updateRecipe, deleteRecipe, recipesByFood };

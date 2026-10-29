@@ -40,8 +40,9 @@ export default function RegisterScreen() {
       setNote(notice(login));
       return;
     }
-    await session.signIn((login.data as { accessToken: string }).accessToken);
-    const profile = await request('/user/', { token: (login.data as { accessToken: string }).accessToken });
+    const pair = login.data as { accessToken: string; refreshToken: string };
+    await session.signIn(pair.accessToken, pair.refreshToken);
+    const profile = await request('/user/', { token: pair.accessToken });
     router.replace((profile.data as { user?: { group_id?: string } })?.user?.group_id ? '/fridge' : '/group');
   }
 

@@ -30,12 +30,14 @@ export default function SignInScreen() {
     const out = await request('/user/login/', { method: 'post', body: { email, password } });
     setNote(notice(out));
     if (out.code !== '00047') return;
-    const token = (out.data as { accessToken: string }).accessToken;
-    await session.signIn(token);
+    const pair = out.data as { accessToken: string; refreshToken: string };
+    // The refresh token is stored with the access token (D117): a session left overnight
+    // renews itself instead of forcing a second login.
+    await session.signIn(pair.accessToken, pair.refreshToken);
     opened.current = true;
     // The profile read is the answer to "does this account already have a tủ", asked now
     // rather than read from a screen that has not re-rendered yet.
-    const profile = await request('/user/', { token });
+    const profile = await request('/user/', { token: pair.accessToken });
     router.replace((profile.data as { user?: { group_id?: string } })?.user?.group_id ? '/fridge' : '/group');
   }
 

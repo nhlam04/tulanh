@@ -1,5 +1,6 @@
 // App shell scope (Minh): the offline rule, the queue guard, the socket handshake.
-import { request, setBase, baseUrl, DEFAULT_BASE } from '../src/api/client';
+import { request, rawRequest, setBase, baseUrl, DEFAULT_BASE, EXPIRED, setRenewer } from '../src/api/client';
+import { tokenStore } from '../src/auth/token';
 import { init, queueOp, pendingOps, markSent, QueueDb } from '../src/offline/queue';
 import { sendQueue } from '../src/offline/send';
 import { BASE_URL_KEY, initSettings, readSetting, writeSetting } from '../src/settings';
@@ -144,4 +145,81 @@ test('the device keeps the server address it was given (D100)', () => {
   expect(readSetting(db, BASE_URL_KEY)).toBe('http://192.168.1.10:5000/it4788');
   writeSetting(db, BASE_URL_KEY, 'https://tulanh-api-mapotofu40-5000.ngrok.io/it4788');
   expect(readSetting(db, BASE_URL_KEY)).toBe('https://tulanh-api-mapotofu40-5000.ngrok.io/it4788');
+});
+
+// Renewal rule (D117): an expired access token gets one refresh and one retry; a refused
+// refresh keeps the server's answer so the screens show the signed-out state.
+test('the expired codes are the four that the table of codes calls session-expired', () => {
+  expect(EXPIRED).toEqual(['00011', '00012', '00055', '00062']);
+});
+
+test('a call the server expired is renewed and sent once more (D117)', async () => {
+  setBase('http://127.0.0.1:5000/it4788');
+  const tokens: Array<string | null> = [];
+  const original = global.fetch;
+  global.fetch = (async (_url: unknown, init?: RequestInit) => {
+    const header = (init?.headers as Record<string, string> || {}).authorization || '';
+    tokens.push(header ? header.replace('Bearer ', '') : null);
+    if (header === 'Bearer expired') {
+      return { json: async () => ({ code: '00012', message: 'Token không hợp lệ. Token có thể đã hết hạn.', data: null }) };
+    }
+    return { json: async () => ({ code: '00089', message: 'Lấy thông tin tài khoản thành công.', data: { user: {} } }) };
+  }) as unknown as typeof fetch;
+  let renewals = 0;
+  setRenewer(async () => {
+    renewals += 1;
+    return 'fresh';
+  });
+  const out = await request('/user/', { token: 'expired' });
+  global.fetch = original;
+  setRenewer(null);
+  expect(out.code).toBe('00089');
+  expect(renewals).toBe(1);
+  expect(tokens).toEqual(['expired', 'fresh']);
+});
+
+test('a refresh the server refuses keeps the expired answer (D117)', async () => {
+  const original = global.fetch;
+  global.fetch = (async () => ({ json: async () => ({ code: '00012', message: 'Token không hợp lệ. Token có thể đã hết hạn.', data: null }) })) as unknown as typeof fetch;
+  setRenewer(async () => null);
+  const out = await request('/user/', { token: 'expired' });
+  global.fetch = original;
+  setRenewer(null);
+  expect(out.code).toBe('00012');
+});
+
+test('an expired answer without a renewer, or without a token, is not retried (D117)', async () => {
+  let fetches = 0;
+  const original = global.fetch;
+  global.fetch = (async () => {
+    fetches += 1;
+    return { json: async () => ({ code: '00062', message: 'Token đã hết hạn, vui lòng đăng nhập.', data: null }) };
+  }) as unknown as typeof fetch;
+  const withToken = await request('/user/', { token: 'expired' });
+  const withoutToken = await request('/user/');
+  global.fetch = original;
+  expect(fetches).toBe(2);
+  expect(withToken.code).toBe('00062');
+  expect(withoutToken.code).toBe('00062');
+});
+
+test('the token store keeps the pair and still reads a legacy entry (D117)', async () => {
+  let stored: string | false = false;
+  const keychain = {
+    getGenericPassword: async () => (stored ? { password: stored as string } : false),
+    setGenericPassword: async (_user: string, password: string) => {
+      stored = password;
+    },
+    resetGenericPassword: async () => {
+      stored = false;
+    },
+  };
+  const store = tokenStore(keychain);
+  expect(await store.get()).toBe(null);
+  await store.set('a1', 'r1');
+  expect(await store.get()).toEqual({ access: 'a1', refresh: 'r1' });
+  stored = 'legacy-access';
+  expect(await store.get()).toEqual({ access: 'legacy-access', refresh: null });
+  await store.clear();
+  expect(await store.get()).toBe(null);
 });

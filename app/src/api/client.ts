@@ -54,10 +54,21 @@ export type RequestOptions = {
   requestId?: string | null;
 };
 
-// Offline rule (D38): read only. A write is queued by the caller, not sent here.
-// A server that cannot be reached answers the same code as the offline switch, so the
-// caller has one rule to follow, not two.
-export async function request(path: string, options: RequestOptions = {}): Promise<Envelope & { status: number; queued?: boolean }> {
+// Renewal rule (D117): these are the codes that mean the access token itself is no longer
+// valid. The session registers a renewer, and a call that comes back with one of these
+// codes is sent once more with the renewed token. The renewal is the session's job, not the
+// client's — the client only hands the failed call back. If the renewer answers null, the
+// session is over and the caller keeps the server's sentence.
+export const EXPIRED = ['00011', '00012', '00055', '00062'];
+export type Renewer = () => Promise<string | null>;
+
+let renewer: Renewer | null = null;
+export function setRenewer(fn: Renewer | null): void {
+  renewer = fn;
+}
+
+// The wire call. No renewal here: one fetch, one answer, or the offline/no-route code.
+export async function rawRequest(path: string, options: RequestOptions = {}): Promise<Envelope & { status: number; queued?: boolean }> {
   const method = options.method || 'get';
   if (options.offline && method !== 'get') {
     return { code: '00008', message: messageFor('00008'), data: null, status: 0, queued: true };
@@ -73,6 +84,15 @@ export async function request(path: string, options: RequestOptions = {}): Promi
   } catch {
     return { code: '00008', message: messageFor('00008'), data: null, status: 0 };
   }
+}
+
+export async function request(path: string, options: RequestOptions = {}): Promise<Envelope & { status: number; queued?: boolean }> {
+  const out = await rawRequest(path, options);
+  if (out.code && EXPIRED.includes(out.code) && options.token && renewer) {
+    const next = await renewer();
+    if (next) return rawRequest(path, { ...options, token: next });
+  }
+  return out;
 }
 
 export { DEFAULT_BASE };

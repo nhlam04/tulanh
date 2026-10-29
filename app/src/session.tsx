@@ -7,7 +7,7 @@ import { tokenStore } from './auth/token';
 import { openQueueDb } from './offline/db';
 import { init as initQueue, type QueueDb } from './offline/queue';
 import { startShell } from './shell';
-import { baseUrl, request, setBase } from './api/client';
+import { baseUrl, rawRequest, request, setBase, setRenewer } from './api/client';
 import { BASE_URL_KEY, initSettings, readSetting, writeSetting } from './settings';
 
 export type Session = {
@@ -18,7 +18,7 @@ export type Session = {
   base: string;
   setBase(next: string): void;
   setOffline(next: boolean): void;
-  signIn(token: string): Promise<void>;
+  signIn(access: string, refresh?: string | null): Promise<void>;
   signOut(): Promise<void>;
   reload(): Promise<void>;
 };
@@ -27,6 +27,7 @@ const empty = createContext<Session | null>(null);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [user, setUser] = useState<Record<string, unknown> | null>(null);
   const [offline, setOffline] = useState(false);
   const [base, setBaseState] = useState(baseUrl());
@@ -56,11 +57,46 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setBase(saved);
       setBaseState(saved);
     }
-    store.get().then(async (t) => {
-      setToken(t);
-      await readProfile(t);
+    store.get().then(async (pair) => {
+      if (!pair) return;
+      setToken(pair.access);
+      setRefreshToken(pair.refresh);
+      await readProfile(pair.access);
     });
   }, [db, store, readProfile]);
+
+  // Renewal (D117): when the server says the access token is spent, the session asks the
+  // refresh token for a new pair, once. The lock keeps a burst of expired calls behind one
+  // refresh; the server rotates the refresh token, so every answer stores the new pair.
+  // If the refresh itself is refused, the session is really over: the pair is cleared and
+  // the screens see the signed-out state.
+  useEffect(() => {
+    let inflight: Promise<string | null> | null = null;
+    setRenewer(async () => {
+      if (!refreshToken) return null;
+      if (!inflight) {
+        inflight = (async () => {
+          const out = await rawRequest('/user/refresh-token/', { method: 'post', body: { refreshToken } });
+          if (out.code === '00065') {
+            const pair = (out.data as { accessToken: string; refreshToken: string });
+            await store.set(pair.accessToken, pair.refreshToken);
+            setToken(pair.accessToken);
+            setRefreshToken(pair.refreshToken);
+            return pair.accessToken;
+          }
+          await store.clear();
+          setToken(null);
+          setRefreshToken(null);
+          setUser(null);
+          return null;
+        })().finally(() => {
+          inflight = null;
+        });
+      }
+      return inflight;
+    });
+    return () => setRenewer(null);
+  }, [refreshToken, store]);
 
   useEffect(() => {
     if (!token) {
@@ -91,10 +127,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       setBaseState(current);
     },
     setOffline,
-    async signIn(next: string) {
-      await store.set(next);
-      setToken(next);
-      await readProfile(next);
+    async signIn(access, refresh = null) {
+      await store.set(access, refresh);
+      setToken(access);
+      setRefreshToken(refresh);
+      await readProfile(access);
     },
     async signOut() {
       await request('/user/logout/', { method: 'post', token });

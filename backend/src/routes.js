@@ -2,6 +2,7 @@ const express = require('express');
 const { envelope } = require('./envelope');
 const { rateLimit, authenticate, attachGroup, errorHandler } = require('./middleware/core');
 const { logWrite } = require('./services/logs');
+const { DENY_CODES } = require('./services/permission');
 const { uploadImage } = require('./middleware/upload');
 
 const services = require('./services');
@@ -100,8 +101,14 @@ function handle(deps, method, path, serviceName, write, needsAuth) {
     req.resSent = true;
     res.status(result.code === '00008' ? 500 : 200).json(envelope(result.code, result.data || null));
     if (write && req.ctx.groupId) deps.emit(req.ctx.groupId, path, result.data || null);
-    if (write || String(result.code).includes('quyền') || String(result.code).includes('admin')) {
-      await logWrite(deps, { userId: req.ctx.userId, groupId: req.ctx.groupId, route: path, code: result.code, ip: req.ip });
+    // Log rule (D28): a write is logged, and so is a refusal. A code is digits, so the check
+    // reads the refusal set in permission.js instead of looking for a word inside a code.
+    if (write || DENY_CODES.includes(result.code)) {
+      const denied = DENY_CODES.includes(result.code);
+      await logWrite(deps, {
+        userId: req.ctx.userId, groupId: req.ctx.groupId, route: path, code: result.code,
+        level: denied ? 'warn' : 'info', ip: req.ip,
+      });
     }
   };
 }

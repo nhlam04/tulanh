@@ -41,4 +41,4 @@ function createApp(deps) {
   return app;
 }
 
-module.exports = { createApp, buildDeps, COLLECTIONS };
+module.exports = { createApp, buildDeps };

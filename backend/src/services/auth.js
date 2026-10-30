@@ -1,6 +1,6 @@
 const { config } = require('../config');
 const { sign, verify, hashPassword, checkPassword, hashToken } = require('../util/token');
-const rules = require('../rules');
+const rules = require('../../../shared/rules');
 
 // Auth rule (D25): one state for activation and verification. Business routes
 // read `is_verified`; login keeps its own gate, so the two codes stay apart.

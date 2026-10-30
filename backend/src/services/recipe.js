@@ -19,7 +19,7 @@ async function addIngredients(deps, ctx) {
   if (!ctx.input.recipeId) return { code: '00358' };
   const recipe = await deps.repos.recipes.findOne({ _id: ctx.input.recipeId });
   if (!recipe) return { code: '00367' };
-  if (!permissions.canWrite(recipe, ctx)) return { code: '00167x' };
+  if (!permissions.canWrite(recipe, ctx)) return { code: permissions.DENY_OWNER };
   const rows = [];
   for (const item of ctx.input.ingredients || []) {
     const food = await deps.repos.foods.findOne({ group_id: ctx.groupId, name: item.foodName });
@@ -61,7 +61,7 @@ async function recipeIngredients(deps, ctx) {
 async function updateRecipe(deps, ctx) {
   const recipe = await deps.repos.recipes.findOne({ _id: ctx.input.recipeId });
   if (!recipe) return { code: '00367' };
-  if (!permissions.canWrite(recipe, ctx)) return { code: '00167x' };
+  if (!permissions.canWrite(recipe, ctx)) return { code: permissions.DENY_OWNER };
   const patch = { ...(ctx.input.newName ? { name: ctx.input.newName } : {}), updated_at: deps.now() };
   return { code: '00370', data: { recipe: await deps.repos.recipes.updateOne({ _id: recipe._id }, patch) } };
 }
@@ -70,7 +70,7 @@ async function deleteRecipe(deps, ctx) {
   if (!ctx.input.recipeId) return { code: '00372' };
   const recipe = await deps.repos.recipes.findOne({ _id: ctx.input.recipeId });
   if (!recipe) return { code: '00373' };
-  if (!permissions.canWrite(recipe, ctx)) return { code: '00167x' };
+  if (!permissions.canWrite(recipe, ctx)) return { code: permissions.DENY_OWNER };
   await deps.repos.recipes.deleteOne({ _id: recipe._id });
   return { code: '00376' };
 }

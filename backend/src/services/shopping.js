@@ -1,5 +1,5 @@
 const permissions = require('./permission');
-const rules = require('../rules');
+const rules = require('../../../shared/rules');
 
 // Offline rule (D38): read only, plus the bought path with a stored request.
 // request_id is the retry guard, so a replay does not create a second lot.
@@ -174,4 +174,4 @@ async function deleteTask(deps, ctx) {
   return { code: '00299' };
 }
 
-module.exports = { addTasks, claimTask, markBought, reposOf, useWithin, createList, listLists, updateList, deleteList, listTasks, updateTask, deleteTask };
+module.exports = { addTasks, claimTask, markBought, reposOf, createList, listLists, updateList, deleteList, listTasks, updateTask, deleteTask };

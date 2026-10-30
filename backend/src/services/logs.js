@@ -1,6 +1,6 @@
 // Log rule (D12, D63): every call that changes data, and every denied call.
 // Fields: user, code, level, message, ip, time, plus route and status.
-async function logCall(deps, { userId, groupId, route, code, level, ip }) {
+async function logWrite(deps, { userId, groupId, route, code, level, ip }) {
   await deps.repos.system_logs.insertOne({
     user_id: userId || null,
     group_id: groupId || null,
@@ -13,4 +13,4 @@ async function logCall(deps, { userId, groupId, route, code, level, ip }) {
   });
 }
 
-module.exports = { logWrite: logCall };
+module.exports = { logWrite };

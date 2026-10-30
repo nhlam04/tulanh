@@ -247,6 +247,7 @@
   "00341": "Tên thực phẩm mới không tồn tại",
   "00344": "Cập nhật kế hoạch bữa ăn thành công",
   "00345": "Bạn chưa vào nhóm nào",
+  "00346": "Đã ghi kết quả gửi thông báo qua Expo Push.",
   "00348": "Lấy danh sách thành công",
   "00349": "Vui lòng cung cấp tất cả các trường bắt buộc",
   "00350": "Vui lòng cung cấp một tên thực phẩm hợp lệ",
@@ -287,5 +288,6 @@
   "00397": "Kết quả tìm kiếm trả về.",
   "00398": "Tìm kiếm không có kết quả.",
   "00399": "Từ khóa tìm kiếm quá ngắn.",
-  "00400": "Danh sách nguyên liệu của các công thức đã lưu."
+  "00400": "Danh sách nguyên liệu của các công thức đã lưu.",
+  "00401": "Không có thiết bị nào để gửi thông báo."
 }

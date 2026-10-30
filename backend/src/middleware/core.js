@@ -1,18 +1,25 @@
 const { config } = require('../config');
 const { verify } = require('../util/token');
 const { envelope } = require('../envelope');
+const { duplicateCode } = require('../errors');
 
-// Rate limit (D11): 60 per minute, window per IP.
-const hits = new Map();
+// Rate limit (D11): 60 per minute, window per IP. One entry per IP holds the window it counts,
+// so a window that has closed is dropped when the next request for that IP arrives. Keying the
+// Map by "ip:minute" kept an entry for every minute a busy IP had ever reached.
+const hits = new Map(); // ip -> { minute, count }
 function resetRateLimit() {
   hits.clear();
 }
 
 function rateLimit(req, res, next) {
   const minute = Math.floor(Date.now() / 60000);
-  const key = `${req.ip}:${minute}`;
-  hits.set(key, (hits.get(key) || 0) + 1);
-  if (hits.get(key) > config.rateLimitPerMinute) return res.status(429).json(envelope('00024'));
+  const window = hits.get(req.ip);
+  if (!window || window.minute !== minute) {
+    hits.set(req.ip, { minute, count: 1 });
+    return next();
+  }
+  window.count += 1;
+  if (window.count > config.rateLimitPerMinute) return res.status(429).json(envelope('00024'));
   next();
 }
 
@@ -40,10 +47,12 @@ function attachGroup(deps) {
 function errorHandler(deps) {
   return function errorHandler(error, req, res, next) {
     if (error.code === 11000) {
-      const code = String(error.message).includes('request_id') ? '00387' : '00151';
-      return res.status(409).json(envelope(code));
+      return res.status(409).json(envelope(duplicateCode(error.collection, error.keyPattern)));
     }
-    if (error.name === 'MongoError' || String(error.message).includes('ObjectId')) {
+    // The store builds an ObjectId only for a 24-character hex id, so an id the driver cannot
+    // read comes from a value outside the store. Driver 7 names that error BSONError; the name
+    // this branch used, MongoError, belongs to driver 3 and never appears here.
+    if (error.name === 'BSONError') {
       return res.status(400).json(envelope('00023'));
     }
     if (!req.resSent) {

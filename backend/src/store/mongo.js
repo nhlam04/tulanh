@@ -68,8 +68,15 @@ function buildStore(db, session = null) {
         return (await cursor.limit(options.limit || config.pageLimit).toArray()).map(asString);
       },
       async insertOne(doc) {
-        const result = await col.insertOne(toDoc(doc), { session });
-        return asString({ ...doc, _id: result.insertedId });
+        try {
+          const result = await col.insertOne(toDoc(doc), { session });
+          return asString({ ...doc, _id: result.insertedId });
+        } catch (error) {
+          // A clash is answered by the index that fired, so the error needs the collection the
+          // store was writing to. The driver error names the index key but not the collection.
+          if (error.code === 11000) error.collection = name;
+          throw error;
+        }
       },
       async updateOne(filter, patch) {
         const result = await col.updateOne(toFilter(filter), { $set: toDoc(patch) }, { session });
@@ -112,4 +119,4 @@ async function connect(uri, options = {}) {
   };
 }
 
-module.exports = { connect, buildStore };
+module.exports = { connect };

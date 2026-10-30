@@ -2,7 +2,7 @@ const { memoryStore } = require('../src/store/memory');
 const { buildDeps } = require('../src/app');
 
 const EMPTY = {
-  users: [], groups: [], membership: [], categories: [], units: [], foods: [], fridge_lots: [],
+  users: [], groups: [], categories: [], units: [], foods: [], fridge_lots: [],
   shopping_lists: [], shopping_tasks: [], meal_plans: [], recipes: [], ingredients: [],
   consumption_events: [], user_devices: [], refresh_tokens: [], verification_codes: [],
   notification_log: [], system_logs: [],

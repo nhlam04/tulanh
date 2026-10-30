@@ -1,4 +1,5 @@
 const permissions = require('./permission');
+const rules = require('../../../shared/rules');
 
 // Rule C (D29): a member can create a food, and the row creator owns the edit.
 // The code table still reads group admin, so the report shows this as a proposal.
@@ -66,7 +67,7 @@ async function listFoods(deps, ctx) {
 // Rule for search (D76): the text index matches whole stemmed words, so the
 // rule cannot read as a substring match. The endpoint was lost in the fixed file.
 async function searchFood(deps, ctx) {
-  const shape = require('../rules').searchShape(ctx.input);
+  const shape = rules.searchShape(ctx.input);
   if (shape.code) return shape;
   if (!ctx.groupId) return { code: '00096' };
   const foods = await deps.repos.foods.find({

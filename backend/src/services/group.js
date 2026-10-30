@@ -47,8 +47,4 @@ async function leaveGroup(deps, ctx) {
   return { code: '00385' };
 }
 
-function groupTimezone(deps, groupId) {
-  return deps.repos.groups.findOne({ _id: groupId }).then((group) => (group && group.timezone) || 'Asia/Ho_Chi_Minh');
-}
-
-module.exports = { createGroup, addMember, removeMember, members, leaveGroup, groupTimezone };
+module.exports = { createGroup, addMember, removeMember, members, leaveGroup };

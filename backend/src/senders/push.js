@@ -3,7 +3,6 @@
 // The send answer is a push ticket, not a delivery. Delivery is read from the receipt, so
 // the sender keeps the ticket id and checks the receipt later. A receipt that reads
 // DeviceNotRegistered stops the sender from using that token again.
-const { config } = require('../config');
 
 const PUSH_URL = process.env.EXPO_PUSH_URL || 'https://exp.host/--/api/v2/push/send';
 const RECEIPT_URL = process.env.EXPO_RECEIPT_URL || 'https://exp.host/--/api/v2/push/getReceipts';
@@ -32,7 +31,8 @@ function daysLeft(useUntil, day) {
 }
 
 async function sendPush(devices, lot, timezone, food, day) {
-  if (!devices.length) return { code: '00346', data: { skipped: true } };
+  // The skip answer is its own code, so the send result (00346) always means a send was made.
+  if (!devices.length) return { code: '00401', data: { skipped: true } };
   const name = food && food.name ? food.name : 'món trong tủ';
   const left = daysLeft(lot.use_until, day || dayIn(timezone, new Date()));
   const messages = devices
@@ -43,7 +43,7 @@ async function sendPush(devices, lot, timezone, food, day) {
       body: `${name} còn ${left} ngày`,
       data: { lot_id: String(lot._id), screen: 'fridge' },
     }));
-  if (!messages.length) return { code: '00346', data: { skipped: true, devices: devices.length } };
+  if (!messages.length) return { code: '00401', data: { skipped: true, devices: devices.length } };
   const res = await fetch(PUSH_URL, { method: 'POST', headers: headers(), body: JSON.stringify(messages) });
   const body = await res.json();
   const tickets = (body.data || []).map((ticket) => ({ id: ticket.id, status: ticket.status, error: ticket.details ? ticket.details.error : null }));
@@ -69,4 +69,4 @@ async function markUnregistered(deps, deviceId) {
   return deps.repos.user_devices.updateOne({ _id: deviceId }, { unregistered_at: deps.now() });
 }
 
-module.exports = { sendPush, checkReceipts, markUnregistered, daysLeft, ttl: config.codeTtlMs };
+module.exports = { sendPush, checkReceipts, markUnregistered, daysLeft };

@@ -1,5 +1,5 @@
 const permissions = require('./permission');
-const rules = require('../rules');
+const rules = require('../../../shared/rules');
 
 // Lot model (D18): one document per lot, so a food can hold several lots.
 // Code 00199 is the duplicate rule for the same food and the same lot key.
@@ -71,12 +71,4 @@ async function lotsByFood(deps, ctx) {
   return { code: '00386', data: { lots } };
 }
 
-async function getLot(deps, ctx) {
-  if (!ctx.groupId) return { code: '00225' };
-  const lot = await deps.repos.fridge_lots.findOne({ _id: ctx.input.lotId });
-  if (!lot) return { code: '00213' };
-  if (String(lot.group_id) !== String(ctx.groupId)) return { code: '00212' };
-  return { code: '00237', data: { lot } };
-}
-
-module.exports = { createLot, updateLot, deleteLot, listLots, lotsByFood, getLot };
+module.exports = { createLot, updateLot, deleteLot, listLots, lotsByFood };

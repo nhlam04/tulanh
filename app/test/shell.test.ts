@@ -1,9 +1,9 @@
 // App shell scope (Minh): the offline rule, the queue guard, the socket handshake.
-import { request, rawRequest, setBase, baseUrl, DEFAULT_BASE, EXPIRED, setRenewer } from '../src/api/client';
+import * as client from '../src/api/client';
+import { request, rawRequest, baseUrl, DEFAULT_BASE, EXPIRED, setRenewer } from '../src/api/client';
 import { tokenStore } from '../src/auth/token';
 import { init, queueOp, pendingOps, markSent, QueueDb } from '../src/offline/queue';
 import { sendQueue } from '../src/offline/send';
-import { BASE_URL_KEY, initSettings, readSetting, writeSetting } from '../src/settings';
 import { writeOrQueue } from '../src/offline/write';
 import type { Session } from '../src/session';
 
@@ -105,11 +105,12 @@ test('a write the server never answered is queued as well', async () => {
   expect(pendingOps(db).length).toBe(1);
 });
 
-test('the server address is a device setting, not a build constant', () => {
-  setBase('http://10.0.0.5:5000/it4788');
-  expect(baseUrl()).toBe('http://10.0.0.5:5000/it4788');
-  setBase('   ');
+// Address rule (D100, patched 2026-10-30): the address is the client's, not the person's. A
+// screen has no field for it and no way to change it, so a run that needs another host names it
+// in the environment before the client starts.
+test('the client holds one address and offers no way to change it (D100)', () => {
   expect(baseUrl()).toBe(DEFAULT_BASE);
+  expect(typeof (client as Record<string, unknown>).setBase).toBe('undefined');
 });
 
 jest.mock('socket.io-client', () => ({ io: (url: string, options: unknown) => ({ url, options }) }));
@@ -124,29 +125,6 @@ test('the socket handshake carries the token, and the url is the origin', async 
   expect(connection.options.auth.token).toBe('t1');
 });
 
-// Device setting rule (D100): the address typed on the phone is kept for the next launch.
-test('the device keeps the server address it was given (D100)', () => {
-  const values: Record<string, string> = {};
-  const db: QueueDb = {
-    run(sql, params) {
-      if (sql.startsWith('INSERT INTO settings')) values[String(params[0])] = String(params[1]);
-    },
-    all() {
-      return [];
-    },
-    get(sql, params) {
-      const key = String(params[0]);
-      return values[key] === undefined ? null : { value: values[key] };
-    },
-  };
-  initSettings(db);
-  expect(readSetting(db, BASE_URL_KEY)).toBe(null);
-  writeSetting(db, BASE_URL_KEY, 'http://192.168.1.10:5000/it4788');
-  expect(readSetting(db, BASE_URL_KEY)).toBe('http://192.168.1.10:5000/it4788');
-  writeSetting(db, BASE_URL_KEY, 'https://tulanh-api-mapotofu40-5000.ngrok.io/it4788');
-  expect(readSetting(db, BASE_URL_KEY)).toBe('https://tulanh-api-mapotofu40-5000.ngrok.io/it4788');
-});
-
 // Renewal rule (D117): an expired access token gets one refresh and one retry; a refused
 // refresh keeps the server's answer so the screens show the signed-out state.
 test('the expired codes are the four that the table of codes calls session-expired', () => {
@@ -154,7 +132,6 @@ test('the expired codes are the four that the table of codes calls session-expir
 });
 
 test('a call the server expired is renewed and sent once more (D117)', async () => {
-  setBase('http://127.0.0.1:5000/it4788');
   const tokens: Array<string | null> = [];
   const original = global.fetch;
   global.fetch = (async (_url: unknown, init?: RequestInit) => {

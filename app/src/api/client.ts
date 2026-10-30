@@ -8,16 +8,15 @@ export type Envelope = { code: string; message: string; data: unknown | null };
 
 const DEFAULT_BASE = 'http://127.0.0.1:5000/it4788';
 
-// The base is a device setting, not a build constant. The dev route to the phone is a tunnel
-// whose address changes every run, so a value fixed at build time cannot reach the server.
-let base = process.env.API_BASE || DEFAULT_BASE;
+// The base is the client's, not the person's (D100, patched 2026-10-30). A screen has no field
+// for it: a person testing the app cannot know which host the server sits on, and a wrong one
+// only produces a message they cannot act on. The phone reaches this machine through the
+// forwarded ports, so the loopback address is the right default (D110); a run that needs another
+// host sets API_BASE before the client starts.
+const base = process.env.API_BASE || DEFAULT_BASE;
 
 export function baseUrl(): string {
   return base;
-}
-
-export function setBase(next: string): void {
-  base = next && next.trim() ? next.trim() : DEFAULT_BASE;
 }
 
 export function messageFor(code: string): string {

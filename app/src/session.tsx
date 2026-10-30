@@ -1,5 +1,7 @@
-// Session rule (Minh, app shell): one place holds the token, the device database, the
-// server address and the offline switch. A screen reads from here; no screen owns a token.
+// Session rule (Minh, app shell): one place holds the token, the device database and the
+// offline switch. A screen reads from here; no screen owns a token. The server address is not
+// held here either — it belongs to the client (D100) — the session only shows what the client
+// is using.
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import * as Keychain from 'react-native-keychain';
 import type { Socket } from 'socket.io-client';
@@ -7,8 +9,7 @@ import { tokenStore } from './auth/token';
 import { openQueueDb } from './offline/db';
 import { init as initQueue, type QueueDb } from './offline/queue';
 import { startShell } from './shell';
-import { baseUrl, rawRequest, request, setBase, setRenewer } from './api/client';
-import { BASE_URL_KEY, initSettings, readSetting, writeSetting } from './settings';
+import { baseUrl, rawRequest, request, setRenewer } from './api/client';
 
 export type Session = {
   token: string | null;
@@ -17,7 +18,6 @@ export type Session = {
   offline: boolean;
   base: string;
   lastEvent: { name: string; payload: unknown } | null;
-  setBase(next: string): void;
   setOffline(next: boolean): void;
   signIn(access: string, refresh?: string | null): Promise<void>;
   signOut(): Promise<void>;
@@ -32,12 +32,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<Record<string, unknown> | null>(null);
   const [offline, setOffline] = useState(false);
   const [lastEvent, setLastEvent] = useState<{ name: string; payload: unknown } | null>(null);
-  const [base, setBaseState] = useState(baseUrl());
+  const base = baseUrl();
   const store = useMemo(() => tokenStore(Keychain), []);
   const db = useMemo(() => {
     const handle = openQueueDb();
     initQueue(handle);
-    initSettings(handle);
     return handle;
   }, []);
   const connection = useRef<Socket | null>(null);
@@ -52,20 +51,13 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // The address typed last time is read first, so the profile read below goes to the server
-    // that address names instead of the built-in default (D100).
-    const saved = readSetting(db, BASE_URL_KEY);
-    if (saved) {
-      setBase(saved);
-      setBaseState(saved);
-    }
     store.get().then(async (pair) => {
       if (!pair) return;
       setToken(pair.access);
       setRefreshToken(pair.refresh);
       await readProfile(pair.access);
     });
-  }, [db, store, readProfile]);
+  }, [store, readProfile]);
 
   // Renewal (D117): when the server says the access token is spent, the session asks the
   // refresh token for a new pair, once. The lock keeps a burst of expired calls behind one
@@ -127,12 +119,6 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     offline,
     base,
     lastEvent,
-    setBase(next: string) {
-      setBase(next);
-      const current = baseUrl();
-      writeSetting(db, BASE_URL_KEY, current);
-      setBaseState(current);
-    },
     setOffline,
     async signIn(access, refresh = null) {
       await store.set(access, refresh);

@@ -1,5 +1,7 @@
 // Sign-in screen (Minh, app shell): the one job of getting back to your tủ (rule 8).
 // Registering and opening a first group are their own screens, reached from here.
+// No address field (D100, patched 2026-10-30): the person who opens the app is not the one who
+// knows where the server runs, and a wrong address only gives a sentence they cannot act on.
 // The words on the screen are sentences (D108): the server's own message, read from the
 // shared table when the server sends none.
 import { useEffect, useRef, useState } from 'react';
@@ -13,7 +15,6 @@ export default function SignInScreen() {
   const session = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [base, setBaseUrl] = useState(session.base);
   const [note, setNote] = useState<Note>({ text: 'Chào mừng bạn về tủ lành', bad: false });
 
   // A restored token opens the tủ, not the form again: the app keeps the sign-in across a
@@ -50,14 +51,6 @@ export default function SignInScreen() {
         <Field label="Mật khẩu" value={password} onChangeText={setPassword} secureTextEntry />
         <Button label="Đăng nhập" onPress={signIn} />
         <Button label="Chưa có tài khoản" onPress={() => router.push('/register')} outline />
-        <Field
-          label="Địa chỉ server"
-          value={base}
-          onChangeText={(next) => {
-            setBaseUrl(next);
-            session.setBase(next);
-          }}
-        />
       </Screen>
     </View>
   );

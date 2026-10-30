@@ -7,8 +7,14 @@
   "userInterfaceStyle": "light",
   "plugins": [
     "expo-router",
-    ["expo-notifications", { "color": "#3f7d5b" }],
-    "expo-sqlite"
+    [
+      "expo-notifications",
+      {
+        "color": "#3f7d5b"
+      }
+    ],
+    "expo-sqlite",
+    "@react-native-community/datetimepicker"
   ],
   "android": {
     "package": "com.tulanh.app",

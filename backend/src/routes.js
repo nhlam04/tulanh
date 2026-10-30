@@ -1,6 +1,6 @@
 const express = require('express');
 const { envelope } = require('./envelope');
-const { rateLimit, authenticate, attachGroup, errorHandler } = require('./middleware/core');
+const { rateLimit, authenticate, attachGroup } = require('./middleware/core');
 const { logWrite } = require('./services/logs');
 const { DENY_CODES } = require('./services/permission');
 const { uploadImage } = require('./middleware/upload');
@@ -12,11 +12,11 @@ const services = require('./services');
 // sync, admin reads, devices, export and reports. `false` means the path is not in the spec.
 // write true marks the routes that change data, so the log rule covers them.
 const routes = [
-  ['post', '/user/', 'auth.register', false, false, true],
-  ['post', '/user/login/', 'auth.login', false, false, true],
+  ['post', '/user/', 'auth.register', true, false, true],
+  ['post', '/user/login/', 'auth.login', true, false, true],
   ['post', '/user/logout/', 'auth.logout', true, true, true],
   ['post', '/user/refresh-token/', 'auth.refresh', true, false, true],
-  ['post', '/user/send-verification-code/', 'auth.sendCode', false, false, true],
+  ['post', '/user/send-verification-code/', 'auth.sendCode', true, false, true],
   ['post', '/user/verify-email/', 'auth.verifyCode', true, false, true],
   ['get', '/user/', 'user.getProfile', false, true, true],
   ['put', '/user/', 'user.updateProfile', true, true, true],
@@ -95,7 +95,8 @@ function handle(deps, method, path, serviceName, write, needsAuth) {
     try {
       result = await service(deps, req.ctx);
     } catch (error) {
-      req.resSent = true;
+      // Nothing has been answered yet, so the error handler owns both the answer and its log row.
+      // Marking resSent here was what kept the error level from ever being written.
       return deps.nextError(error, req, res);
     }
     req.resSent = true;
@@ -124,7 +125,9 @@ function buildRouter(deps) {
     if (method === 'post' && path === '/uploads/') chain.push(uploadImage);
     router[method](path, ...chain, handle(deps, method, path, service, write, needsAuth));
   }
-  router.use(errorHandler(deps));
+  // The error answer lives at app level, after the router. Inside the router it could only see
+  // errors a route raised, so a failure before routing, such as a body the JSON parser cannot
+  // read, answered with the framework's own text instead of the envelope.
   return router;
 }
 

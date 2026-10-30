@@ -39,6 +39,8 @@ function createApp(deps) {
   const app = express();
   app.use(express.json());
   app.use(config.basePath, buildRouter(deps));
+  // Mounted after the router, so it answers every error, including one raised before routing.
+  app.use(deps.nextError);
   return app;
 }
 

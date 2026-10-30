@@ -56,18 +56,24 @@ function errorHandler(deps) {
       return res.status(400).json(envelope('00023'));
     }
     if (!req.resSent) {
+      // The route is stored the way the route table names it, so a log row reads against the API
+      // list. At app level req.path still carries the mount, and a failure before routing has no
+      // user or group to name, so those read as null.
+      const route = req.path.startsWith(config.basePath) ? req.path.slice(config.basePath.length) : req.path;
       deps.repos.system_logs.insertOne({
-        user_id: req.ctx && req.ctx.userId,
-        group_id: req.ctx && req.ctx.groupId,
-        route: req.path,
+        user_id: (req.ctx && req.ctx.userId) || null,
+        group_id: (req.ctx && req.ctx.groupId) || null,
+        route,
         code: '00008',
         level: 'error',
         message: error.message,
         ip: req.ip,
-        created_at: new Date(),
+        created_at: deps.now(),
       }).catch(() => {});
     }
-    res.status(500).json(envelope('00008'));
+    // The parser names its own status (400 for a body it cannot read); a failure the server
+    // caused keeps 500. The code table has no row for a malformed body, so the generic row answers.
+    res.status(error.status || 500).json(envelope('00008'));
   };
 }
 

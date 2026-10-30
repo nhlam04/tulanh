@@ -17,7 +17,7 @@ export default function MealRoute() {
   async function reload() {
     const [foods, out] = await Promise.all([
       request('/food/', { token: session.token }),
-      loadMeals({ token: session.token, offline: false, dispatch: (rows) => setMeals(rows as Record<string, unknown>[]) }),
+      loadMeals({ token: session.token, offline: session.offline, dispatch: (rows) => setMeals(rows as Record<string, unknown>[]) }),
     ]);
     setNames(namesOf(foods, 'foods'));
     setNote(failure(out));

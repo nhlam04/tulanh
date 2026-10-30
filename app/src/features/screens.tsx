@@ -1,7 +1,6 @@
 // Feature screens (Hùng): the loaders read the shared paths, the lists read the kit, so
 // one row looks the same on every screen and one situation reads the same everywhere.
 import { request } from '../api/client';
-import { canEdit } from './permission';
 import { daysLeft } from './days';
 import { Empty, List, ListRow } from './ui';
 
@@ -12,16 +11,19 @@ export type NameMap = Record<string, string>;
 
 // Catalog rows arrive as {_id, name}; the screens show names, so every route reads the
 // same id-to-name map from the answer it was given.
-export function namesOf(out: { data: unknown | null }, key: string): NameMap {
-  const rows = (out.data as Record<string, Record<string, unknown>[]> | null)?.[key] || [];
+export function nameMap(rows: Record<string, unknown>[]): NameMap {
   return Object.fromEntries(rows.map((row) => [String(row._id), String(row.name)]));
+}
+
+export function namesOf(out: { data: unknown | null }, key: string): NameMap {
+  return nameMap((out.data as Record<string, Record<string, unknown>[]> | null)?.[key] || []);
 }
 
 // Member rows come back with `id`, `name` and `username`. A claimed row names the person
 // with the name they chose for themselves; the username is an account key, so it is only a
-// fallback for an account that has no name (rule 2 and rule 9).
-export function peopleOf(out: { data: unknown | null }): NameMap {
-  const rows = (out.data as { members?: Record<string, unknown>[] } | null)?.members || [];
+// fallback for an account that has no name (rule 2 and rule 9). The loader below is the one
+// read for members, so a screen maps what it was dispatched, it does not call the path.
+export function peopleOf(rows: Record<string, unknown>[]): NameMap {
   return Object.fromEntries(rows.map((row) => [String(row.id), String(row.name || row.username || '')]));
 }
 

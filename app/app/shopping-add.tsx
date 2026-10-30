@@ -4,10 +4,10 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { failure, request, type Note } from '../src/api/client';
+import { failure, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { writeOrQueue } from '../src/offline/write';
-import { loadLists, namesOf, peopleOf } from '../src/features/screens';
+import { loadFoods, loadLists, loadMembers, nameMap, peopleOf } from '../src/features/screens';
 import { Bar, Button, ChipGroup, Field, Notice, Screen, styles } from '../src/features/ui';
 
 export default function ShoppingAddRoute() {
@@ -23,15 +23,11 @@ export default function ShoppingAddRoute() {
   useEffect(() => {
     if (!session.token) return;
     (async () => {
-      const [foodOut, listsOut, membersOut] = await Promise.all([
-        request('/food/', { token: session.token }),
-        request('/shopping/', { token: session.token }),
-        request('/user/group/', { token: session.token }),
+      await Promise.all([
+        loadFoods({ token: session.token, offline: session.offline, dispatch: (rows) => setFoods(nameMap(rows as Record<string, unknown>[])) }),
+        loadLists({ token: session.token, offline: session.offline, dispatch: (rows) => setListId(rows.length ? String((rows[0] as Record<string, unknown>)._id) : '') }),
+        loadMembers({ token: session.token, offline: session.offline, dispatch: (rows) => setBuyerNames(peopleOf(rows as Record<string, unknown>[])) }),
       ]);
-      setFoods(namesOf(foodOut, 'foods'));
-      setBuyerNames(peopleOf(membersOut));
-      const lists = (listsOut.data as { lists: Record<string, unknown>[] } | null)?.lists || [];
-      setListId(lists.length ? String(lists[0]._id) : '');
     })();
   }, [session.token, session.base]);
 

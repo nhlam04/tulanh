@@ -20,9 +20,9 @@ export default function FridgeRoute() {
 
   async function reload() {
     const [foods, units, fridge] = await Promise.all([
-      loadFoods({ token: session.token, offline: false, dispatch: () => {} }),
+      loadFoods({ token: session.token, offline: session.offline, dispatch: () => {} }),
       request('/food/unit/', { token: session.token }),
-      loadFridge({ token: session.token, offline: false, dispatch: () => {} }),
+      loadFridge({ token: session.token, offline: session.offline, dispatch: () => {} }),
     ]);
     setFoodNames(namesOf(foods, 'foods'));
     setUnitNames(namesOf(units, 'units'));

@@ -18,7 +18,7 @@ export default function FoodRoute() {
 
   async function reload() {
     const [foodsOut, cats, un] = await Promise.all([
-      loadFoods({ token: session.token, offline: false, dispatch: (rows) => setFoods(rows as Record<string, unknown>[]) }),
+      loadFoods({ token: session.token, offline: session.offline, dispatch: (rows) => setFoods(rows as Record<string, unknown>[]) }),
       request('/food/category/', { token: session.token }),
       request('/food/unit/', { token: session.token }),
     ]);
@@ -32,7 +32,7 @@ export default function FoodRoute() {
   }, [session.token, session.base]);
 
   async function search() {
-    const out = await searchFoods({ token: session.token, offline: false, dispatch: (rows) => setFoods(rows as Record<string, unknown>[]) }, keyword);
+    const out = await searchFoods({ token: session.token, offline: session.offline, dispatch: (rows) => setFoods(rows as Record<string, unknown>[]) }, keyword);
     setNote(failure(out));
   }
 

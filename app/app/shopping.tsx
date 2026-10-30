@@ -8,7 +8,7 @@ import { router } from 'expo-router';
 import { failure, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { writeOrQueue } from '../src/offline/write';
-import { ShoppingScreen, loadFoods, loadLists, loadTasks, namesOf, peopleOf } from '../src/features/screens';
+import { ShoppingScreen, loadFoods, loadLists, loadMembers, loadTasks, nameMap, peopleOf } from '../src/features/screens';
 import { Bar, Button, Field, Notice, Screen, TabBar, styles } from '../src/features/ui';
 
 export default function ShoppingRoute() {
@@ -26,14 +26,11 @@ export default function ShoppingRoute() {
   // its own sentence, and the notice line shows that sentence.
 
   async function reload() {
-    const [foods, listsOut, membersOut] = await Promise.all([
-      request('/food/', { token: session.token }),
-      loadLists({ token: session.token, offline: false, dispatch: (rows) => setLists(rows as Record<string, unknown>[]) }),
-      request('/user/group/', { token: session.token }),
+    await Promise.all([
+      loadFoods({ token: session.token, offline: session.offline, dispatch: (rows) => setFoodNames(nameMap(rows as Record<string, unknown>[])) }),
+      loadLists({ token: session.token, offline: session.offline, dispatch: (rows) => setLists(rows as Record<string, unknown>[]) }).then((out) => setNote(failure(out))),
+      loadMembers({ token: session.token, offline: session.offline, dispatch: (rows) => setPeople(peopleOf(rows as Record<string, unknown>[])) }),
     ]);
-    setFoodNames(namesOf(foods, 'foods'));
-    setPeople(peopleOf(membersOut));
-    setNote(failure(listsOut));
   }
 
   useEffect(() => {
@@ -45,7 +42,7 @@ export default function ShoppingRoute() {
       setTasks([]);
       return;
     }
-    loadTasks({ token: session.token, offline: false, dispatch: (rows) => setTasks(rows as Record<string, unknown>[]) }, listId);
+    loadTasks({ token: session.token, offline: session.offline, dispatch: (rows) => setTasks(rows as Record<string, unknown>[]) }, listId);
   }, [listId, session.token, session.base]);
 
   async function createList() {
@@ -57,13 +54,13 @@ export default function ShoppingRoute() {
   async function claim(taskId: string) {
     const out = await request('/shopping/claim/', { method: 'post', body: { taskId }, token: session.token });
     setNote(failure(out));
-    if (out.code === '00389') loadTasks({ token: session.token, offline: false, dispatch: (rows) => setTasks(rows as Record<string, unknown>[]) }, listId);
+    if (out.code === '00389') loadTasks({ token: session.token, offline: session.offline, dispatch: (rows) => setTasks(rows as Record<string, unknown>[]) }, listId);
   }
 
   async function bought(taskId: string) {
     const out = await writeOrQueue(session, '/shopping/bought/', { taskId }, { type: 'task_bought', payload: { taskId } });
     setNote(out.queued ? { text: 'Đã xếp vào hàng đợi để gửi sau', bad: false } : failure(out));
-    if (out.code === '00390') loadTasks({ token: session.token, offline: false, dispatch: (rows) => setTasks(rows as Record<string, unknown>[]) }, listId);
+    if (out.code === '00390') loadTasks({ token: session.token, offline: session.offline, dispatch: (rows) => setTasks(rows as Record<string, unknown>[]) }, listId);
   }
 
   const listLabel = lists.length ? String(lists[0].name || 'danh sách hiện có') : 'chưa có danh sách';

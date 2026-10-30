@@ -20,8 +20,8 @@ export default function StatsRoute() {
 
   async function reload() {
     const [purchases, consumption] = await Promise.all([
-      loadStats({ token: session.token, offline: false, dispatch: (rows) => setBought(rows as ReportGroup[]) }, from, to),
-      loadConsumption({ token: session.token, offline: false, dispatch: (rows) => setUsed(rows as ReportGroup[]) }, from, to),
+      loadStats({ token: session.token, offline: session.offline, dispatch: (rows) => setBought(rows as ReportGroup[]) }, from, to),
+      loadConsumption({ token: session.token, offline: session.offline, dispatch: (rows) => setUsed(rows as ReportGroup[]) }, from, to),
     ]);
     const failed = [purchases, consumption].find((out) => out.status === 0 || out.status >= 400);
     setNote(failure(failed || purchases));

@@ -33,7 +33,7 @@ export default function MealPlanRoute() {
     }
     const [foodsOut] = await Promise.all([
       request('/food/', { token: session.token }),
-      loadPlans({ token: session.token, offline: false, dispatch: (rows) => setPlans(rows as Record<string, unknown>[]) }, date),
+      loadPlans({ token: session.token, offline: session.offline, dispatch: (rows) => setPlans(rows as Record<string, unknown>[]) }, date),
     ]);
     setFoods(namesOf(foodsOut, 'foods'));
   }

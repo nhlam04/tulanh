@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 # QA run (Hòa): Newman runs the collection built from the route table.
-# The token is not passed in: the login request inside the collection stores it in the run
-# environment, so the run is self-contained. The host is written plainly in the collection,
-# because newman 6.2.3 does not resolve a variable in the host position.
+# The host is written plainly in the collection, because newman 6.2.3 does not resolve a variable in
+# the host position, so this form needs a server already running on port 5000.
 #
-# Two things this command form cannot do on this machine: it needs a server already running on
-# port 5000, and the assertions read the seeded state, so the register request reads the duplicate
-# rule and login reads the gate unless the demo user is verified in the database first. Use
-# postman/run.js for the automated run, which seeds the user and reports the codes.
+# The assertions read rules, not state. The collection names an account the run creates for itself,
+# so register answers the register rule and login answers the gate that refuses an account the run
+# cannot verify. The same pair holds on any database, which the first version could not do: it
+# asserted codes for one fixed demo account, so a database that already had that account read the
+# duplicate rule instead.
+#
+# The reads still need a session. The login request stores the token only when the account is
+# verified, and a run cannot verify the account it created, because the code leaves through the mail
+# path. So fill {{token}} in the Postman environment from a verified account, or use postman/run.js,
+# which seeds one, signs in over http and passes the token in.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."

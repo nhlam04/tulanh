@@ -6,9 +6,21 @@ const { MongoMemoryReplSet } = require('mongodb-memory-server');
 const { MongoClient } = require('mongodb');
 const { spawn } = require('node:child_process');
 
-const PORT = 5000;
+// The collection writes the host and port plainly, because newman does not resolve a variable in the
+// host position. The walk rewrites the port to the one it started, so a server already holding 5000
+// does not stop the walk.
+const PORT = Number(process.env.PORT || 5000);
 const BASE = `http://127.0.0.1:${PORT}/it4788`;
+const atPort = (url) => url.replace(':5000', `:${PORT}`);
 const DEMO = { email: 'demo@mail.com', password: 'password1', name: 'Demo User', username: 'demo' };
+
+// The account the collection names in its pre-request script, written out here so the walk sends the
+// same bodies the collection would send.
+const RUN = {
+  email: 'qa-' + Date.now() + '@postman.test',
+  username: 'qa' + Date.now(),
+  password: 'password1',
+};
 
 async function main() {
   const rs = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
@@ -44,10 +56,16 @@ async function main() {
   for (const folder of collection.item) {
     for (const entry of folder.item) {
       const request = entry.request;
-      const response = await fetch(request.url, {
+      const raw = request.body && request.body.raw
+        ? request.body.raw
+            .replace('{{qa_email}}', RUN.email)
+            .replace('{{qa_username}}', RUN.username)
+            .replace('{{qa_password}}', RUN.password)
+        : undefined;
+      const response = await fetch(atPort(request.url), {
         method: request.method,
         headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
-        body: ['POST', 'PUT', 'DELETE'].includes(request.method) && request.body ? request.body.raw : undefined,
+        body: ['POST', 'PUT', 'DELETE'].includes(request.method) ? raw : undefined,
       });
       const body = await response.json();
       results.push({ folder: folder.name, request: entry.name, status: response.status, code: body.code, shapeOk: Object.keys(body).sort().join(',') === 'code,data,message' });

@@ -2,7 +2,7 @@
   "info": {
     "name": "tulanh-api",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0",
-    "description": "Built from src/routes.js. The order runs auth first, so the token is set before the reads."
+    "description": "Built from src/routes.js. The order runs auth first. The codes asserted there are rules, not state: the run creates its own account, so register reads the register rule and login reads the gate that refuses an account the run cannot verify. {{token}} for the reads comes from a verified account, which postman/run.js signs in and passes in."
   },
   "item": [
     {
@@ -21,16 +21,26 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"email\":\"demo@mail.com\",\"password\":\"password1\",\"name\":\"Demo User\",\"username\":\"demo\"}"
-            }
+              "raw": "{\"email\":\"{{qa_email}}\",\"password\":\"{{qa_password}}\",\"name\":\"QA Run User\",\"username\":\"{{qa_username}}\"}"
+            },
+            "description": "The run names its own account, so this request reads the register rule instead of the duplicate rule."
           },
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "if (!pm.variables.get('qa_email')) pm.variables.set('qa_email', 'qa-' + Date.now() + '@postman.test');\nif (!pm.variables.get('qa_username')) pm.variables.set('qa_username', 'qa' + Date.now());\nif (!pm.variables.get('qa_password')) pm.variables.set('qa_password', 'password1');"
+                ]
+              }
+            },
             {
               "listen": "test",
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n  pm.expect(body.code).to.equal('00032');\n});\nconst body = pm.response.json(); if (body.data && body.data.accessToken) pm.environment.set('token', body.data.accessToken);"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n  pm.expect(body.code).to.equal('00035');\n});\nconst body = pm.response.json(); if (body.data && body.data.accessToken) pm.variables.set('token', body.data.accessToken);"
                 ]
               }
             }
@@ -49,16 +59,26 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"email\":\"demo@mail.com\",\"password\":\"password1\"}"
-            }
+              "raw": "{\"email\":\"{{qa_email}}\",\"password\":\"{{qa_password}}\"}"
+            },
+            "description": "The account this run created is not verified, so the login gate answers. {{token}} for the reads comes from a verified account: postman/run.js signs in and passes it, or fill it in the Postman environment after signing in by hand."
           },
           "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "if (!pm.variables.get('qa_email')) pm.variables.set('qa_email', 'qa-' + Date.now() + '@postman.test');\nif (!pm.variables.get('qa_username')) pm.variables.set('qa_username', 'qa' + Date.now());\nif (!pm.variables.get('qa_password')) pm.variables.set('qa_password', 'password1');"
+                ]
+              }
+            },
             {
               "listen": "test",
               "script": {
                 "type": "exec",
                 "exec": [
-                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n  pm.expect(body.code).to.equal('00047');\n});\nconst body = pm.response.json(); if (body.data && body.data.accessToken) pm.environment.set('token', body.data.accessToken);"
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n  pm.expect(body.code).to.equal('00044');\n});\nconst body = pm.response.json(); if (body.data && body.data.accessToken) pm.variables.set('token', body.data.accessToken);"
                 ]
               }
             }
@@ -178,9 +198,69 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"email\":\"demo@mail.com\",\"code\":\"123456\"}"
+              "raw": "{\"email\":\"{{qa_email}}\",\"code\":\"123456\"}"
             },
-            "description": "D96: the email names the account; a session is not needed and is not read."
+            "description": "D96: the email names the account; a session is not needed and is not read. The code cannot be read by the run, because it leaves through the mail path, so this request asserts only the envelope shape."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /user/",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:5000/it4788/user/",
+            "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /user/",
+          "request": {
+            "method": "PUT",
+            "url": "http://127.0.0.1:5000/it4788/user/",
+            "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
           },
           "event": [
             {
@@ -199,6 +279,38 @@
           "request": {
             "method": "POST",
             "url": "http://127.0.0.1:5000/it4788/user/change-password/",
+            "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /user/",
+          "request": {
+            "method": "DELETE",
+            "url": "http://127.0.0.1:5000/it4788/user/",
             "header": [
               {
                 "key": "content-type",
@@ -1825,6 +1937,34 @@
           "request": {
             "method": "GET",
             "url": "http://127.0.0.1:5000/it4788/recipe/",
+            "header": [
+              {
+                "key": "content-type",
+                "value": "application/json"
+              },
+              {
+                "key": "authorization",
+                "value": "{{token}}"
+              }
+            ]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "exec",
+                "exec": [
+                  "pm.test('the response reads the envelope shape', () => {\n  const body = pm.response.json();\n  pm.expect(Object.keys(body).sort().join(',')).to.equal('code,data,message');\n});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /recipe/ingredients/ (not in the spec table)",
+          "request": {
+            "method": "GET",
+            "url": "http://127.0.0.1:5000/it4788/recipe/ingredients/",
             "header": [
               {
                 "key": "content-type",

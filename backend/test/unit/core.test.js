@@ -41,6 +41,31 @@ describe('permission, Rule C', () => {
   });
 });
 
+describe('the duplicate rule reads the index, not the words (D19)', () => {
+  const { duplicateCode, duplicateError } = require('../../src/errors');
+
+  test('each unique index the code table names keeps its own code', () => {
+    expect(duplicateCode('users', { email: 1 })).toBe('00032');
+    expect(duplicateCode('users', { username: 1 })).toBe('00084');
+    expect(duplicateCode('categories', { name: 1 })).toBe('00132');
+    expect(duplicateCode('units', { name: 1 })).toBe('00113');
+    expect(duplicateCode('foods', { group_id: 1, name: 1 })).toBe('00151');
+    expect(duplicateCode('shopping_tasks', { list_id: 1, food_id: 1 })).toBe('00309');
+    expect(duplicateCode('consumption_events', { request_id: 1 })).toBe('00387');
+    // A unique index the table has no row for answers with the fallback row.
+    expect(duplicateCode('fridge_lots', { group_id: 1, food_id: 1 })).toBe('00114');
+  });
+
+  test('the error the store hands back carries the pair the code is read from', () => {
+    // Shape measured on driver 7.7, 2026-10-29: MongoServerError with code 11000 and keyPattern;
+    // the namespace field the old code read is undefined on this driver.
+    const error = duplicateError('users', { username: 1 }, { username: 'an' });
+    expect(error.name).toBe('MongoServerError');
+    expect(error.code).toBe(11000);
+    expect(duplicateCode(error.collection, error.keyPattern)).toBe('00084');
+  });
+});
+
 describe('sync queue and admin levels', () => {
   test('a queued write applies once, and a replay reads the stored event (D38)', async () => {
     const deps = seed();

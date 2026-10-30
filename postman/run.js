@@ -11,22 +11,21 @@
 // not fire in the callback form on this version, so the codes come from walk.js, which sends the
 // same requests over http.
 //
-// The first version of this file looked like it hung. It did not: it used the emitter form alone and
-// read `summary.run.responseCount.total`, which is undefined without a reporter, so the handler threw
-// and the promise never resolved. Memory was not the cause — the same probe ran with 27.9 GB free and
-// behaved the same way.
-//
-// The run cannot read the mailbox, because the verification code leaves the server through the mail
-// path. So the run registers the demo user here, sets it verified in the database, and then runs the
-// collection. The register request inside the collection reads the duplicate rule, and the login
-// request reads the successful sign-in and stores the token.
+// The run cannot read the mailbox, so it cannot close the verification loop. It seeds one verified
+// account only to give the reads a session: it signs in over http and passes the token as an
+// environment value. The assertions inside the collection do not read this account, because they
+// read rules the run creates for itself.
 const { MongoMemoryReplSet } = require('mongodb-memory-server');
 const { MongoClient } = require('mongodb');
 const newman = require('newman');
 const { spawn } = require('node:child_process');
 
-const PORT = 5000;
+// The collection writes the host and port plainly, because newman does not resolve a variable in the
+// host position. The run rewrites the port to the one it started, so a server already holding 5000
+// does not stop the run.
+const PORT = Number(process.env.PORT || 5000);
 const BASE = `http://127.0.0.1:${PORT}/it4788`;
+const atPort = (url) => url.replace(':5000', `:${PORT}`);
 const DEMO = { email: 'demo@mail.com', password: 'password1', name: 'Demo User', username: 'demo' };
 
 async function main() {
@@ -49,15 +48,27 @@ async function main() {
   const client = await MongoClient.connect(uri);
   await client.db('tulanh').collection('users').updateOne({ email: DEMO.email }, { $set: { is_verified: true, role: 'admin' } });
 
+  const signed = await fetch(`${BASE}/user/login/`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ email: DEMO.email, password: DEMO.password }),
+  });
+  const session = await signed.json();
+  const token = (session.data && session.data.accessToken) || '';
+  console.log('seed login:', session.code, 'token passed to the run:', Boolean(token));
+
   const collection = JSON.parse(require('node:fs').readFileSync(`${__dirname}/tulanh.postman_collection.json`, 'utf-8'));
   const requestCount = collection.item.reduce((total, folder) => total + folder.item.length, 0);
+  for (const folder of collection.item) {
+    for (const entry of folder.item) entry.request.url = atPort(entry.request.url);
+  }
 
   const failures = [];
 
-  const summary = await new Promise((resolve, reject) => {
+  await new Promise((resolve, reject) => {
     const emitter = newman.run({
-      collection: `${__dirname}/tulanh.postman_collection.json`,
-      env: [{ key: 'token', value: '' }],
+      collection,
+      env: [{ key: 'token', value: token }],
       timeout: 10000,
     }, (error, run) => (error ? reject(error) : resolve(run)));
 

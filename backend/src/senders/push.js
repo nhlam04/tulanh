@@ -35,18 +35,23 @@ async function sendPush(devices, lot, timezone, food, day) {
   if (!devices.length) return { code: '00401', data: { skipped: true } };
   const name = food && food.name ? food.name : 'món trong tủ';
   const left = daysLeft(lot.use_until, day || dayIn(timezone, new Date()));
-  const messages = devices
-    .filter((device) => device.push_token && !device.unregistered_at)
-    .map((device) => ({
-      to: device.push_token,
-      title: 'Tủ lành của bạn',
-      body: `${name} còn ${left} ngày`,
-      data: { lot_id: String(lot._id), screen: 'fridge' },
-    }));
-  if (!messages.length) return { code: '00401', data: { skipped: true, devices: devices.length } };
-  const res = await fetch(PUSH_URL, { method: 'POST', headers: headers(), body: JSON.stringify(messages) });
+  const targets = devices.filter((device) => device.push_token && !device.unregistered_at);
+  if (!targets.length) return { code: '00401', data: { skipped: true, devices: devices.length } };
+  const res = await fetch(PUSH_URL, { method: 'POST', headers: headers(), body: JSON.stringify(targets.map((device) => ({
+    to: device.push_token,
+    title: 'Tủ lành của bạn',
+    body: `${name} còn ${left} ngày`,
+    data: { lot_id: String(lot._id), screen: 'fridge' },
+  }))) });
   const body = await res.json();
-  const tickets = (body.data || []).map((ticket) => ({ id: ticket.id, status: ticket.status, error: ticket.details ? ticket.details.error : null }));
+  // The device is kept with its ticket, in the order the messages were sent, so the receipt
+  // check can name which token to stop using.
+  const tickets = (body.data || []).map((ticket, i) => ({
+    id: ticket.id,
+    device_id: String(targets[i]._id),
+    status: ticket.status,
+    error: ticket.details ? ticket.details.error : null,
+  }));
   return { code: '00346', data: { tickets, requestError: body.errors || null } };
 }
 

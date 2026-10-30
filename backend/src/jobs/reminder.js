@@ -1,5 +1,6 @@
-// Three-day rule, as one notice per lot (D35), run in the group timezone (D24),
-// started outside the web process (D34). This file is the worker entry.
+// Three-day rule, as one notice per lot (D35), run in the group timezone (D24).
+// The timer in runner.js calls this from the server process (D34); this file holds the rules,
+// not the timer.
 const { config } = require('../config');
 
 function withinDays(lot, today) {
@@ -25,7 +26,9 @@ async function runReminder(deps, date = new Date()) {
         // The send answer is a ticket. The ticket id is stored with the device, so the
         // receipt check later can name which device to stop using.
         for (const ticket of (out.data && out.data.tickets) || []) {
-          await deps.repos.notification_log.updateOne({ _id: row._id }, { ticket_id: ticket.id });
+          // The ticket id and the device it went to are stored together, so the receipt check
+          // can name the token to stop using.
+          await deps.repos.notification_log.updateOne({ _id: row._id }, { ticket_id: ticket.id, device_id: ticket.device_id });
         }
       }
       await deps.repos.fridge_lots.updateOne({ _id: lot._id }, { notified_on: row.sent_date });
@@ -50,18 +53,16 @@ async function runReceipts(deps) {
   const rows = await deps.repos.notification_log.find({});
   const checked = [];
   for (const row of rows.filter((row) => row.ticket_id && !row.receipt_status)) {
-
     const out = await deps.receipts([row.ticket_id]);
     const receipt = (out.data.receipts || [])[0];
     if (!receipt) continue;
     await deps.repos.notification_log.updateOne({ _id: row._id }, { receipt_status: receipt.status, receipt_error: receipt.error });
-    if (receipt.error === 'DeviceNotRegistered' && row.user_id) {
-      const device = await deps.repos.user_devices.findOne({ user_id: row.user_id });
-      if (device) await deps.repos.user_devices.updateOne({ _id: device._id }, { unregistered_at: deps.now() });
-    }
+    // The rule for a token the platform no longer knows lives in the sender (D33), so the job
+    // calls it instead of writing the same update here.
+    if (receipt.error === 'DeviceNotRegistered' && row.device_id) await deps.markUnregistered(deps, row.device_id);
     checked.push({ ticket: row.ticket_id, status: receipt.status });
   }
   return checked;
 }
 
-module.exports = { runReminder, runRetention, runReceipts, withinDays };
+module.exports = { runReminder, runRetention, runReceipts };

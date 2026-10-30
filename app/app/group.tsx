@@ -3,14 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { notice, request, type Note } from '../src/api/client';
+import { makeNote, notice, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { Bar, Button, Field, Notice, Screen } from '../src/features/ui';
 
 export default function GroupScreen() {
   const session = useSession();
   const [groupName, setGroupName] = useState('');
-  const [note, setNote] = useState<Note>({ text: 'Đặt tên cho tủ chung của nhóm', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('Đặt tên cho tủ chung của nhóm', false));
 
   // Someone who already has a tủ has no business on this screen.
   const moved = useRef(false);
@@ -22,7 +22,7 @@ export default function GroupScreen() {
 
   async function createGroup() {
     if (!groupName.trim()) {
-      setNote({ text: 'Nhóm cần một tên để gọi', bad: true });
+      setNote(makeNote('Nhóm cần một tên để gọi', true));
       return;
     }
     const out = await request('/user/group/', { method: 'post', body: { name: groupName }, token: session.token });

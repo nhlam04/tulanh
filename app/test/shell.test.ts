@@ -113,6 +113,22 @@ test('the client holds one address and offers no way to change it (D100)', () =>
   expect(typeof (client as Record<string, unknown>).setBase).toBe('undefined');
 });
 
+// Notice rule (added 2026-10-30): a message on a screen is the answer to this call, not a
+// sentence left standing. A person who types a wrong password twice gets the same sentence
+// twice, so the note carries the moment it was made and the shared Notice redraws on that
+// moment; otherwise the second error looks like the first one was never read.
+test('the same sentence twice is still two answers (the notice is an event)', () => {
+  const wrong = 'Bạn đã nhập một email hoặc mật khẩu không hợp lệ.';
+  const first = client.notice({ code: '00045', message: wrong, status: 401 });
+  const second = client.notice({ code: '00045', message: wrong, status: 401 });
+  expect(first.text).toBe(second.text);
+  expect(first.at).not.toBe(second.at);
+  // A screen's own sentence is an event too, through the same helper.
+  expect(client.makeNote('Chạm vào món cần sửa trước', true).at).not.toBe(second.at);
+  // A call that worked shows the screen's state, so it still gives a new event with no line.
+  expect(client.failure({ code: '00089', status: 200 }).text).toBe('');
+});
+
 jest.mock('socket.io-client', () => ({ io: (url: string, options: unknown) => ({ url, options }) }));
 
 test('the socket handshake carries the token, and the url is the origin', async () => {

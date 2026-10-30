@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { notice, request, type Note } from '../src/api/client';
+import { makeNote, notice, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { Bar, Button, Field, Notice, Screen } from '../src/features/ui';
 
@@ -16,11 +16,11 @@ export default function RegisterScreen() {
   const [username, setUsername] = useState('');
   const [code, setCode] = useState('');
   const [sent, setSent] = useState(false);
-  const [note, setNote] = useState<Note>({ text: 'Đăng ký để mở tủ lành của bạn', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('Đăng ký để mở tủ lành của bạn', false));
 
   async function register() {
     if (!email || !password) {
-      setNote({ text: 'Cần email và mật khẩu để đăng ký', bad: true });
+      setNote(makeNote('Cần email và mật khẩu để đăng ký', true));
       return;
     }
     const created = await request('/user/', { method: 'post', body: { email, password, name, username } });

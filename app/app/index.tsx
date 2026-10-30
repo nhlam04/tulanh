@@ -7,7 +7,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { notice, request, type Note } from '../src/api/client';
+import { makeNote, notice, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { Bar, Button, Field, Notice, Screen } from '../src/features/ui';
 
@@ -15,7 +15,7 @@ export default function SignInScreen() {
   const session = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [note, setNote] = useState<Note>({ text: 'Chào mừng bạn về tủ lành', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('Chào mừng bạn về tủ lành', false));
 
   // A restored token opens the tủ, not the form again: the app keeps the sign-in across a
   // restart, so a restart is not a second login (rule 1 — the screen shows the real state

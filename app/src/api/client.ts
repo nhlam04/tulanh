@@ -28,14 +28,29 @@ export function messageFor(code: string): string {
 // codes, and Bài tập 06 lists "use the interface to debug" as not a design principle.
 // The code stays where it is read as data: the Postman collection, the integration log,
 // the admin page. `bad` is the colour rule (rule 2): red for a call that did not work.
-export type Note = { text: string; bad: boolean };
+//
+// A notice is an event, not a sentence left standing on the screen (rule added 2026-10-30):
+// `at` is the moment the message was made. The same sentence twice still gives two different
+// notes, so the line a person reads is the answer to what they just typed, and the shared
+// Notice runs its fade again for each one. Without this, a second wrong password leaves the
+// first error on screen and nothing tells the person the app read the new one.
+export type Note = { text: string; bad: boolean; at: number };
+
+let lastStamp = 0;
+
+// One way to write a notice, for the server's sentence and for the screen's own: every message
+// that appears carries the moment it was made. The stamp only moves forward, so two messages
+// made in the same millisecond are still two messages.
+export function makeNote(text: string, bad = false): Note {
+  lastStamp = Math.max(Date.now(), lastStamp + 1);
+  return { text, bad, at: lastStamp };
+}
 
 export function notice(out: { code: string; message?: string; status?: number }): Note {
   const text = out.message && out.message.trim() ? out.message.trim() : messageFor(out.code);
   const bad = out.status === undefined ? false : out.status === 0 || out.status >= 400;
-  return { text, bad };
+  return makeNote(text, bad);
 }
-
 
 // A call that worked is shown as the screen's state, not as a message: the list, the count and
 // the queue line already say it. Only a call that failed gets a line (rule 8, one job per
@@ -43,7 +58,7 @@ export function notice(out: { code: string; message?: string; status?: number })
 // "tủ lạnh"; the app's copy is about tủ lành.
 export function failure(out: { code: string; message?: string; status?: number }): Note {
   const n = notice(out);
-  return n.bad ? n : { text: '', bad: false };
+  return n.bad ? n : makeNote('', false);
 }
 export type RequestOptions = {
   method?: 'get' | 'post' | 'put' | 'delete';

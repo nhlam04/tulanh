@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import * as Notifications from 'expo-notifications';
-import { failure, request, type Note } from '../src/api/client';
+import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { deviceId } from '../src/features/deviceId';
 import { registerPushToken, renderNotification } from '../src/features/push';
@@ -14,7 +14,7 @@ import { Bar, Button, Empty, List, ListRow, Notice, Screen, styles } from '../sr
 
 export default function PushRoute() {
   const session = useSession();
-  const [note, setNote] = useState<Note>({ text: 'đang mở tủ lành…', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('đang mở tủ lành…', false));
   const [listening, setListening] = useState(false);
   const [notices, setNotices] = useState<string[]>([]);
 
@@ -22,7 +22,7 @@ export default function PushRoute() {
     await Notifications.requestPermissionsAsync();
     const result = await registerPushToken();
     setListening(Boolean(result.token));
-    setNote(result.token ? { text: '', bad: false } : { text: result.message || 'chưa mở được thông báo', bad: true });
+    setNote(result.token ? makeNote('', false) : makeNote(result.message || 'chưa mở được thông báo', true));
     if (!result.token || !session.token) return;
     const device = await request('/user/devices/', {
       method: 'post',

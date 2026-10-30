@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { failure, request, type Note } from '../src/api/client';
+import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { loadPlans, namesOf } from '../src/features/screens';
 import { Bar, Button, ChipGroup, Field, List, ListRow, Notice, Screen, styles } from '../src/features/ui';
@@ -24,7 +24,7 @@ export default function MealPlanRoute() {
   const [foods, setFoods] = useState<Record<string, string>>({});
   const [slot, setSlot] = useState('');
   const [foodId, setFoodId] = useState('');
-  const [note, setNote] = useState<Note>({ text: '', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('', false));
 
   async function reload() {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -57,15 +57,15 @@ export default function MealPlanRoute() {
 
   async function save() {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      setNote({ text: 'Ngày phải viết dạng YYYY-MM-DD', bad: true });
+      setNote(makeNote('Ngày phải viết dạng YYYY-MM-DD', true));
       return;
     }
     if (!slot) {
-      setNote({ text: 'Chạm vào bữa cần đặt trước', bad: true });
+      setNote(makeNote('Chạm vào bữa cần đặt trước', true));
       return;
     }
     if (!foodId) {
-      setNote({ text: 'Chưa chọn món nào cho bữa này', bad: true });
+      setNote(makeNote('Chưa chọn món nào cho bữa này', true));
       return;
     }
     const existing = planFor(slot);

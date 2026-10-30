@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { failure, request, type Note } from '../src/api/client';
+import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { namesOf } from '../src/features/screens';
 import { Bar, Button, ChipGroup, Field, Notice, Screen, styles } from '../src/features/ui';
@@ -22,7 +22,7 @@ export default function FridgeAddRoute() {
   const [quantity, setQuantity] = useState('1');
   const [location, setLocation] = useState('');
   const [useUntil, setUseUntil] = useState('');
-  const [note, setNote] = useState<Note>({ text: '', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('', false));
 
   useEffect(() => {
     if (!session.token) return;
@@ -31,20 +31,20 @@ export default function FridgeAddRoute() {
 
   async function save() {
     if (!foodId) {
-      setNote({ text: 'Chưa chọn thực phẩm nào', bad: true });
+      setNote(makeNote('Chưa chọn thực phẩm nào', true));
       return;
     }
     const count = Number(quantity);
     if (!Number.isFinite(count) || count <= 0) {
-      setNote({ text: 'Số lượng phải là một số lớn hơn 0', bad: true });
+      setNote(makeNote('Số lượng phải là một số lớn hơn 0', true));
       return;
     }
     if (!location) {
-      setNote({ text: 'Chưa chọn nơi để trong tủ', bad: true });
+      setNote(makeNote('Chưa chọn nơi để trong tủ', true));
       return;
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(useUntil)) {
-      setNote({ text: 'Ngày dùng đến phải viết dạng YYYY-MM-DD', bad: true });
+      setNote(makeNote('Ngày dùng đến phải viết dạng YYYY-MM-DD', true));
       return;
     }
     const out = await request('/fridge/', { method: 'post', body: { foodId, quantity: count, location, useUntil }, token: session.token });

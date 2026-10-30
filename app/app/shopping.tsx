@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { failure, request, type Note } from '../src/api/client';
+import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { writeOrQueue } from '../src/offline/write';
 import { ShoppingScreen, loadFoods, loadLists, loadMembers, loadTasks, nameMap, peopleOf } from '../src/features/screens';
@@ -18,7 +18,7 @@ export default function ShoppingRoute() {
   const [foodNames, setFoodNames] = useState<Record<string, string>>({});
   const [people, setPeople] = useState<Record<string, string>>({});
   const [listName, setListName] = useState('');
-  const [note, setNote] = useState<Note>({ text: '', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('', false));
 
   const listId = lists.length ? String(lists[0]._id) : '';
   const userId = session.user ? String(session.user.id || '') : '';
@@ -59,7 +59,7 @@ export default function ShoppingRoute() {
 
   async function bought(taskId: string) {
     const out = await writeOrQueue(session, '/shopping/bought/', { taskId }, { type: 'task_bought', payload: { taskId } });
-    setNote(out.queued ? { text: 'Đã xếp vào hàng đợi để gửi sau', bad: false } : failure(out));
+    setNote(out.queued ? makeNote('Đã xếp vào hàng đợi để gửi sau', false) : failure(out));
     if (out.code === '00390') loadTasks({ token: session.token, offline: session.offline, dispatch: (rows) => setTasks(rows as Record<string, unknown>[]) }, listId);
   }
 

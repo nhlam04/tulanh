@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { failure, request, type Note } from '../src/api/client';
+import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { pendingOps } from '../src/offline/queue';
 import { sendQueue } from '../src/offline/send';
@@ -16,7 +16,7 @@ export default function FridgeRoute() {
   const [lots, setLots] = useState<Record<string, unknown>[]>([]);
   const [foodNames, setFoodNames] = useState<Record<string, string>>({});
   const [unitNames, setUnitNames] = useState<Record<string, string>>({});
-  const [note, setNote] = useState<Note>({ text: '', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('', false));
 
   async function reload() {
     const [foods, units, fridge] = await Promise.all([
@@ -38,7 +38,7 @@ export default function FridgeRoute() {
     const out = await writeOrQueue(session, '/consumption/', { lotId, quantity: 1, reason: 'nấu ăn' }, {
       type: 'consumption', payload: { lotId, quantity: 1, reason: 'nấu ăn' },
     });
-    setNote(out.queued ? { text: 'Đã xếp vào hàng đợi để gửi sau', bad: false } : failure(out));
+    setNote(out.queued ? makeNote('Đã xếp vào hàng đợi để gửi sau', false) : failure(out));
     if (out.code === '00387') reload();
   }
 
@@ -51,7 +51,7 @@ export default function FridgeRoute() {
     setNote(
       out.failed.length
         ? failure(out.failed[0])
-        : { text: out.sent ? `Đã gửi ${out.sent} lượt viết` : 'Hàng đợi chưa có gì để gửi', bad: false },
+        : makeNote(out.sent ? `Đã gửi ${out.sent} lượt viết` : 'Hàng đợi chưa có gì để gửi', false),
     );
   }
 

@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { failure, request, type Note } from '../src/api/client';
+import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { namesOf } from '../src/features/screens';
 import { Bar, Button, ChipGroup, Empty, Field, List, ListRow, Notice, Screen, styles } from '../src/features/ui';
@@ -19,7 +19,7 @@ export default function RecipeRoute() {
   const [name, setName] = useState('');
   const [selectedId, setSelectedId] = useState('');
   const [ingredientId, setIngredientId] = useState('');
-  const [note, setNote] = useState<Note>({ text: '', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('', false));
 
   async function reload() {
     const [recipesOut, foodsOut] = await Promise.all([
@@ -50,7 +50,7 @@ export default function RecipeRoute() {
 
   async function create() {
     if (!name.trim()) {
-      setNote({ text: 'Công thức cần một tên để gọi', bad: true });
+      setNote(makeNote('Công thức cần một tên để gọi', true));
       return;
     }
     const out = await request('/recipe/', { method: 'post', body: { name: name.trim() }, token: session.token });
@@ -65,11 +65,11 @@ export default function RecipeRoute() {
 
   async function addIngredient() {
     if (!selectedId) {
-      setNote({ text: 'Chạm vào công thức cần thêm nguyên liệu', bad: true });
+      setNote(makeNote('Chạm vào công thức cần thêm nguyên liệu', true));
       return;
     }
     if (!ingredientId) {
-      setNote({ text: 'Chưa chọn nguyên liệu nào', bad: true });
+      setNote(makeNote('Chưa chọn nguyên liệu nào', true));
       return;
     }
     const out = await request('/recipe/ingredients/', {

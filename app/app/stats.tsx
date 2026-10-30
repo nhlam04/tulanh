@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { failure, type Note } from '../src/api/client';
+import { failure, makeNote, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { ReportScreen, loadConsumption, loadStats, type ReportGroup } from '../src/features/screens';
 import { Bar, Button, Field, Notice, Screen, TabBar, styles } from '../src/features/ui';
@@ -16,7 +16,7 @@ export default function StatsRoute() {
   const [used, setUsed] = useState<ReportGroup[]>([]);
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
-  const [note, setNote] = useState<Note>({ text: '', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('', false));
 
   async function reload() {
     const [purchases, consumption] = await Promise.all([

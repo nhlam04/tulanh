@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { failure, request, type Note } from '../src/api/client';
+import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { FoodScreen, loadFoods, namesOf, searchFoods } from '../src/features/screens';
 import { Bar, Button, Empty, Field, Notice, Screen, TabBar, styles } from '../src/features/ui';
@@ -14,7 +14,7 @@ export default function FoodRoute() {
   const [categories, setCategories] = useState<Record<string, string>>({});
   const [units, setUnits] = useState<Record<string, string>>({});
   const [keyword, setKeyword] = useState('');
-  const [note, setNote] = useState<Note>({ text: '', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('', false));
 
   async function reload() {
     const [foodsOut, cats, un] = await Promise.all([

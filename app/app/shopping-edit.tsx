@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { failure, request, type Note } from '../src/api/client';
+import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { namesOf } from '../src/features/screens';
 import { canEdit } from '../src/features/permission';
@@ -19,7 +19,7 @@ export default function ShoppingEditRoute() {
   const [foods, setFoods] = useState<Record<string, string>>({});
   const [selectedId, setSelectedId] = useState('');
   const [quantity, setQuantity] = useState('');
-  const [note, setNote] = useState<Note>({ text: '', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('', false));
   const userId = session.user ? String(session.user.id || '') : '';
   const role = session.user ? String(session.user.role || '') : '';
 
@@ -49,12 +49,12 @@ export default function ShoppingEditRoute() {
 
   async function save() {
     if (!selectedId) {
-      setNote({ text: 'Chạm vào món cần sửa trước', bad: true });
+      setNote(makeNote('Chạm vào món cần sửa trước', true));
       return;
     }
     const count = Number(quantity);
     if (!Number.isFinite(count) || count <= 0) {
-      setNote({ text: 'Số lượng phải là một số lớn hơn 0', bad: true });
+      setNote(makeNote('Số lượng phải là một số lớn hơn 0', true));
       return;
     }
     const out = await request('/shopping/task/', { method: 'put', body: { taskId: selectedId, newQuantity: count }, token: session.token });

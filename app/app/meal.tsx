@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { failure, request, type Note } from '../src/api/client';
+import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { MealScreen, loadMeals, namesOf } from '../src/features/screens';
 import { Bar, Button, Field, Notice, Screen, TabBar, styles } from '../src/features/ui';
@@ -12,7 +12,7 @@ export default function MealRoute() {
   const [meals, setMeals] = useState<Record<string, unknown>[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [note, setNote] = useState<Note>({ text: '', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('', false));
 
   async function reload() {
     const [foods, out] = await Promise.all([
@@ -29,7 +29,7 @@ export default function MealRoute() {
 
   async function generate() {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      setNote({ text: 'Ngày dự kiến phải viết dạng YYYY-MM-DD', bad: true });
+      setNote(makeNote('Ngày dự kiến phải viết dạng YYYY-MM-DD', true));
       return;
     }
     const out = await request('/meal/generate-list/', { method: 'post', body: { date }, token: session.token });

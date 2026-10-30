@@ -2,18 +2,18 @@
 // and looks the same everywhere. Each part answers one rule of the course material:
 //   Bar     rule 1 — the screen names itself and leaves the system status line unbroken.
 //   Notice  rule 9 — a sentence about what happened, never a code (D108); rule 2 — red
-//           only when the call did not work.
+//           only when the call did not work; and the line redraws for every message, so the
+//           same sentence twice still reads as a new answer.
 //   ListRow the ListTile shape of the course mockups (Bài tập 05): a leading mark, the
 //           name, one quiet line, one action.
 //   Chip    rules 5 and 6 — a choice is tapped from the list the server sent, not typed
 //           out of memory.
 //   Empty   a list with nothing in it says so, and says what to do next.
 // Touch targets keep 44dp of height, the size the touch rules ask for.
-import { ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ReactNode, useEffect, useRef } from 'react';
+import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
-export type Note = { text: string; bad?: boolean };
+import { type Note } from '../api/client';
 
 const brand = '#3f7d5b';
 const ink = '#1c1c1c';
@@ -29,8 +29,10 @@ export const styles = StyleSheet.create({
   barTitle: { color: '#ffffff', fontSize: 17, fontWeight: '600' },
   barSub: { color: '#e6efe9', fontSize: 12, marginTop: 3 },
   body: { padding: 16, gap: 12 },
-  notice: { fontSize: 13, color: quiet, borderLeftWidth: 3, borderLeftColor: hair, paddingLeft: 8 },
-  noticeBad: { color: bad, borderLeftColor: bad },
+  noticeRow: { borderLeftWidth: 3, borderLeftColor: hair, paddingLeft: 8 },
+  noticeRowBad: { borderLeftColor: bad },
+  notice: { fontSize: 13, color: quiet },
+  noticeBad: { color: bad },
   list: { gap: 8 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, backgroundColor: '#ffffff', borderWidth: 1, borderColor: hair, borderRadius: 10 },
   rowPressed: { backgroundColor: '#eaf1ec' },
@@ -83,8 +85,20 @@ export function Screen({ children }: { children: ReactNode }) {
 }
 
 export function Notice({ note }: { note: Note }) {
+  const fade = useRef(new Animated.Value(1)).current;
+  // The line redraws for every message, not only for a different one: a person who typed a
+  // second wrong password gets the same sentence back, and the redraw is what tells them the
+  // app read this one. 180ms reads as a blink and is still visible on a phone.
+  useEffect(() => {
+    fade.setValue(0);
+    Animated.timing(fade, { toValue: 1, duration: 180, easing: Easing.out(Easing.quad), useNativeDriver: true }).start();
+  }, [fade, note.at]);
   if (!note.text) return null;
-  return <Text style={[styles.notice, note.bad ? styles.noticeBad : null]}>{note.text}</Text>;
+  return (
+    <Animated.View style={[styles.noticeRow, note.bad ? styles.noticeRowBad : null, { opacity: fade }]}>
+      <Text style={[styles.notice, note.bad ? styles.noticeBad : null]}>{note.text}</Text>
+    </Animated.View>
+  );
 }
 
 export function Button({ label, onPress, disabled, outline }: { label: string; onPress: () => void; disabled?: boolean; outline?: boolean }) {

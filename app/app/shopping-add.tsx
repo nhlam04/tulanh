@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
-import { failure, type Note } from '../src/api/client';
+import { failure, makeNote, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { writeOrQueue } from '../src/offline/write';
 import { loadFoods, loadLists, loadMembers, nameMap, peopleOf } from '../src/features/screens';
@@ -18,7 +18,7 @@ export default function ShoppingAddRoute() {
   const [quantity, setQuantity] = useState('1');
   const [assignTo, setAssignTo] = useState('');
   const [buyerNames, setBuyerNames] = useState<Record<string, string>>({});
-  const [note, setNote] = useState<Note>({ text: '', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('', false));
 
   useEffect(() => {
     if (!session.token) return;
@@ -33,23 +33,23 @@ export default function ShoppingAddRoute() {
 
   async function save() {
     if (!listId) {
-      setNote({ text: 'Nhóm chưa có danh sách nào để thêm vào', bad: true });
+      setNote(makeNote('Nhóm chưa có danh sách nào để thêm vào', true));
       return;
     }
     if (!foodId) {
-      setNote({ text: 'Chưa chọn thực phẩm nào', bad: true });
+      setNote(makeNote('Chưa chọn thực phẩm nào', true));
       return;
     }
     const count = Number(quantity);
     if (!Number.isFinite(count) || count <= 0) {
-      setNote({ text: 'Số lượng phải là một số lớn hơn 0', bad: true });
+      setNote(makeNote('Số lượng phải là một số lớn hơn 0', true));
       return;
     }
     const out = await writeOrQueue(session, '/shopping/task/', {
       listId,
       tasks: [{ foodId, quantity: count, buyerUsername: assignTo }],
     }, { type: 'task_add', payload: { listId, foodId, quantity: count, buyerUsername: assignTo } });
-    setNote(out.queued ? { text: 'Đã xếp vào hàng đợi để gửi sau', bad: false } : failure(out));
+    setNote(out.queued ? makeNote('Đã xếp vào hàng đợi để gửi sau', false) : failure(out));
     if (out.code === '00287') router.push('/shopping');
   }
 

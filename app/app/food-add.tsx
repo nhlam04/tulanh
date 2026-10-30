@@ -3,7 +3,7 @@
 // name the server would refuse.
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { failure, request, type Note } from '../src/api/client';
+import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { namesOf } from '../src/features/screens';
 import { Bar, Button, ChipGroup, Field, Notice, Screen } from '../src/features/ui';
@@ -21,7 +21,7 @@ export default function FoodAddRoute() {
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [unitId, setUnitId] = useState('');
-  const [note, setNote] = useState<Note>({ text: '', bad: false });
+  const [note, setNote] = useState<Note>(makeNote('', false));
 
   useEffect(() => {
     if (!session.token) return;

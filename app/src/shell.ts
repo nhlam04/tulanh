@@ -1,5 +1,6 @@
 // App shell (Minh): the shell starts the client, the token store, and the socket.
-// On reconnect the shell sends the queue, and the cache serves reads while offline.
+// On reconnect the shell sends the queue and reports the answer through onEvent. Reads are not
+// cached: a read needs the server, so an offline read answers with the offline code.
 import { socket } from './realtime/socket';
 import { sendQueue } from './offline/send';
 import { baseUrl } from './api/client';

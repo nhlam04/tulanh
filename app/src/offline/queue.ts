@@ -1,5 +1,7 @@
-// Offline rule (D38): read cache plus the write queue. The queue keeps request_id,
-// which is the guard the server uses, so a replay cannot create a second lot.
+// Offline rule (D38): the write queue, replayed when the connection is back. Reads need the
+// server, so there is no read cache; a read while offline answers with the offline code.
+// The queue keeps request_id, which is the guard the server uses, so a replay cannot create
+// a second lot.
 // The handle is an interface, so a test can pass a fake instead of expo-sqlite.
 export type QueueDb = {
   run(sql: string, params: unknown[]): void;
@@ -22,11 +24,6 @@ CREATE TABLE IF NOT EXISTS write_queue (
   request_id TEXT NOT NULL UNIQUE,
   payload TEXT NOT NULL,
   sent_at TEXT
-);
-CREATE TABLE IF NOT EXISTS read_cache (
-  path TEXT PRIMARY KEY,
-  payload TEXT NOT NULL,
-  cached_at TEXT NOT NULL
 );
 `;
 
@@ -53,13 +50,4 @@ export function pendingOps(db: QueueDb): QueuedOp[] {
 
 export function markSent(db: QueueDb, requestIds: string[], at: string) {
   for (const requestId of requestIds) db.run('UPDATE write_queue SET sent_at = ? WHERE request_id = ?', [at, requestId]);
-}
-
-export function cacheRead(db: QueueDb, path: string, payload: unknown, at: string) {
-  db.run('INSERT OR REPLACE INTO read_cache (path, payload, cached_at) VALUES (?, ?, ?)', [path, JSON.stringify(payload), at]);
-}
-
-export function readCache(db: QueueDb, path: string) {
-  const row = db.get('SELECT payload FROM read_cache WHERE path = ?', [path]);
-  return row ? JSON.parse(String(row.payload)) : null;
 }

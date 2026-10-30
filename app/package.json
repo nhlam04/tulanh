@@ -7,7 +7,6 @@
     "test": "jest"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "2.5.1",
     "expo": "~52.0.49",
     "expo-application": "~6.0.2",
     "expo-constants": "~17.0.8",

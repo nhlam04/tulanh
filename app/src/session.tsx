@@ -16,6 +16,7 @@ export type Session = {
   db: QueueDb;
   offline: boolean;
   base: string;
+  lastEvent: { name: string; payload: unknown } | null;
   setBase(next: string): void;
   setOffline(next: boolean): void;
   signIn(access: string, refresh?: string | null): Promise<void>;
@@ -30,6 +31,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [user, setUser] = useState<Record<string, unknown> | null>(null);
   const [offline, setOffline] = useState(false);
+  const [lastEvent, setLastEvent] = useState<{ name: string; payload: unknown } | null>(null);
   const [base, setBaseState] = useState(baseUrl());
   const store = useMemo(() => tokenStore(Keychain), []);
   const db = useMemo(() => {
@@ -104,7 +106,11 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       connection.current = null;
       return;
     }
-    const shell = startShell({ db, token });
+    const shell = startShell({
+      db,
+      token,
+      onEvent: (name, payload) => setLastEvent({ name, payload }),
+    });
     shell.then((socket) => {
       connection.current = socket;
     });
@@ -120,6 +126,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     db,
     offline,
     base,
+    lastEvent,
     setBase(next: string) {
       setBase(next);
       const current = baseUrl();

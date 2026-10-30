@@ -9,11 +9,16 @@
 //   Chip    rules 5 and 6 — a choice is tapped from the list the server sent, not typed
 //           out of memory.
 //   Empty   a list with nothing in it says so, and says what to do next.
+//   DateField rules 5 and 6 — a day is tapped from the calendar the system draws, not typed
+//           out of memory; it reads DD-MM-YYYY, the order a person says a date, while the value
+//           the screen keeps is still the shape the server reads.
 // Touch targets keep 44dp of height, the size the touch rules ask for.
-import { ReactNode, useEffect, useRef } from 'react';
-import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ReactNode, useEffect, useRef, useState } from 'react';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import { Animated, Easing, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type Note } from '../api/client';
+import { isoOfDay, readDay } from './days';
 
 const brand = '#3f7d5b';
 const ink = '#1c1c1c';
@@ -52,6 +57,12 @@ export const styles = StyleSheet.create({
   buttonRow: { flexDirection: 'row', gap: 8 },
   fieldLabel: { fontSize: 12, color: quiet, marginBottom: 4 },
   field: { borderWidth: 1, borderColor: '#c9c9c9', borderRadius: 8, padding: 10, minHeight: 44, backgroundColor: '#ffffff', fontSize: 15, color: ink },
+  dateField: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  dateText: { fontSize: 15, color: ink },
+  dateTextEmpty: { fontSize: 15, color: quiet },
+  dateMark: { fontSize: 13, fontWeight: '600', color: brand },
+  clearRow: { marginTop: 6, minHeight: 44, justifyContent: 'center' },
+  clearText: { fontSize: 13, color: brand },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { minHeight: 36, justifyContent: 'center', paddingHorizontal: 12, borderRadius: 16, borderWidth: 1, borderColor: brand, backgroundColor: '#ffffff' },
   chipOn: { backgroundColor: brand },
@@ -127,6 +138,61 @@ export function Field({ label, value, onChangeText, keyboardType, placeholder, s
         autoCapitalize="none"
         secureTextEntry={secureTextEntry}
       />
+    </View>
+  );
+}
+
+// A day is tapped from the calendar the system draws, not typed out of memory (rules 5 and 6).
+// The row shows the day in the order a person says it, DD-MM-YYYY; the value behind it stays
+// the shape the server reads, so the request is unchanged. On Android the tap asks the system
+// for its date dialog through the imperative API, which the package recommends for Android
+// because the component form there has a longer history of bugs; elsewhere the component renders.
+// A day that may be left open says which end it leaves open, and offers one clear.
+export function DateField({ label, value, onChange, optional, openHint }: { label: string; value: string; onChange: (next: string) => void; optional?: boolean; openHint?: string }) {
+  const [open, setOpen] = useState(false);
+  const day = readDay(value);
+
+  function take(picked?: Date | null): void {
+    if (picked) onChange(isoOfDay(picked));
+  }
+
+  function startDay(): Date {
+    return value ? new Date(`${value}T00:00:00`) : new Date();
+  }
+
+  function openPicker(): void {
+    if (Platform.OS === 'android') {
+      DateTimePickerAndroid.open({ value: startDay(), mode: 'date', onChange: (_event, picked) => take(picked) });
+    } else {
+      setOpen(true);
+    }
+  }
+
+  return (
+    <View>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <Pressable style={[styles.field, styles.dateField]} onPress={openPicker} accessibilityRole="button">
+        <Text style={[styles.dateText, day ? null : styles.dateTextEmpty]}>{day || openHint || 'chạm để chọn ngày'}</Text>
+        <Text style={styles.dateMark}>Chọn</Text>
+      </Pressable>
+      {optional && day ? (
+        <Pressable style={styles.clearRow} onPress={() => onChange('')} accessibilityRole="button">
+          <Text style={styles.clearText}>để trống</Text>
+        </Pressable>
+      ) : null}
+      {open ? (
+        <DateTimePicker
+          value={startDay()}
+          mode="date"
+          // 'default' is the system picker. 'dialog' is not a value the package accepts — its
+          // Display is 'spinner' | 'default' | 'clock' | 'calendar'.
+          display="default"
+          onChange={(_event, picked) => {
+            setOpen(false);
+            take(picked);
+          }}
+        />
+      ) : null}
     </View>
   );
 }

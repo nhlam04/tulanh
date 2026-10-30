@@ -1,17 +1,20 @@
 // Meal screen (Hùng): the meals the tủ lành can cook now, and the list for a planned date.
+// The planned day is tapped from the calendar the system draws (rules 5 and 6) and reads
+// DD-MM-YYYY; the request keeps the shape the server reads.
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
+import { isoOfDay } from '../src/features/days';
 import { MealScreen, loadMeals, namesOf } from '../src/features/screens';
-import { Bar, Button, Field, Notice, Screen, TabBar, styles } from '../src/features/ui';
+import { Bar, Button, DateField, Notice, Screen, TabBar, styles } from '../src/features/ui';
 
 export default function MealRoute() {
   const session = useSession();
   const [meals, setMeals] = useState<Record<string, unknown>[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(isoOfDay(new Date()));
   const [note, setNote] = useState<Note>(makeNote('', false));
 
   async function reload() {
@@ -28,10 +31,6 @@ export default function MealRoute() {
   }, [session.token, session.base]);
 
   async function generate() {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      setNote(makeNote('Ngày dự kiến phải viết dạng YYYY-MM-DD', true));
-      return;
-    }
     const out = await request('/meal/generate-list/', { method: 'post', body: { date }, token: session.token });
     setNote(failure(out));
     if (out.code === '00393') router.push('/shopping');
@@ -43,7 +42,7 @@ export default function MealRoute() {
       <Screen>
         <Notice note={note} />
         <MealScreen items={meals} names={names} />
-        <Field label="Ngày dự kiến" value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" />
+        <DateField label="Ngày dự kiến" value={date} onChange={setDate} />
         <Button label="Lập danh sách mua" onPress={generate} />
         {/* Scheduling is the spec's "Lên lịch bữa ăn", one job per screen (rule 8), so it
             gets its own screen reached from here, like the fridge reaches its add screen. */}

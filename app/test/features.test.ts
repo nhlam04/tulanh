@@ -2,7 +2,7 @@
 // and a notice opens exactly one screen.
 import { canEdit } from '../src/features/permission';
 import { screenFor, watchTap } from '../src/features/push';
-import { daysLeft } from '../src/features/days';
+import { daysLeft, isoOfDay, readDay } from '../src/features/days';
 
 const mockListeners: ((response: unknown) => void)[] = [];
 
@@ -42,4 +42,14 @@ test('the days left are counted the way the notice counts them', () => {
   expect(daysLeft('2026-10-29', today)).toBe(3);
   expect(daysLeft('2026-10-26', today)).toBe(0);
   expect(daysLeft('not a date', today)).toBeNull();
+});
+
+// The reading rule (2026-10-30): a day on a screen says itself in the order a person says it,
+// while the value behind it stays the shape shared/rules.js reads. The two are the same day, so
+// a picker can never send a form the server answers 00193 to.
+test('a day reads the way a person says it and keeps the shape the server reads', () => {
+  expect(readDay('2026-10-30')).toBe('30-10-2026');
+  expect(readDay('30-10-2026')).toBe(''); // the reading is not a value to send
+  expect(isoOfDay(new Date(2026, 9, 30))).toBe('2026-10-30');
+  expect(isoOfDay(new Date(2026, 9, 30, 23, 30))).toBe('2026-10-30'); // a late tap stays on its day
 });

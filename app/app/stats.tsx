@@ -1,14 +1,15 @@
 // Statistics screen (Hùng): what the group bought, and why the tủ emptied.
 // The report arrives keyed by name, so the screen reads the keys it was given.
 // The spec reads a report over a period, so the two day fields bound the answer;
-// an empty field leaves that end open (rule 2: the screen says what it is counting).
+// an empty field leaves that end open (rule 2: the screen says what it is counting). The days
+// are tapped from the calendar the system draws (rules 5 and 6), and read DD-MM-YYYY.
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { failure, makeNote, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
 import { ReportScreen, loadConsumption, loadStats, type ReportGroup } from '../src/features/screens';
-import { Bar, Button, Field, Notice, Screen, TabBar, styles } from '../src/features/ui';
+import { Bar, Button, DateField, Notice, Screen, TabBar, styles } from '../src/features/ui';
 
 export default function StatsRoute() {
   const session = useSession();
@@ -36,8 +37,8 @@ export default function StatsRoute() {
       <Bar title="Thống kê" sub="mua và dùng trong nhóm" />
       <Screen>
         <Notice note={note} />
-        <Field label="Từ ngày" value={from} onChangeText={setFrom} placeholder="YYYY-MM-DD, để trống là đầu" />
-        <Field label="Đến ngày" value={to} onChangeText={setTo} placeholder="YYYY-MM-DD, để trống là đến nay" />
+        <DateField label="Từ ngày" value={from} onChange={setFrom} optional openHint="để trống là đầu" />
+        <DateField label="Đến ngày" value={to} onChange={setTo} optional openHint="để trống là đến nay" />
         <ReportScreen groups={bought} label="Đã mua" />
         <ReportScreen groups={used} label="Đã dùng" />
         <Button label="Đọc lại" onPress={reload} outline />

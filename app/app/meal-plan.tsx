@@ -2,14 +2,16 @@
 // asks for planning sáng, trưa, tối by day (Chức năng chính: "Lên lịch bữa ăn"), and the
 // server keeps one food per slot. The slot is picked by tapping its row (rule 5: no free
 // text), the dish from the catalog chips (rules 5 and 6), and a save that already has a
-// dish changes it instead of adding a second plan for the same slot.
+// dish changes it instead of adding a second plan for the same slot. The day is tapped from the
+// calendar the system draws (rules 5 and 6) and reads DD-MM-YYYY, and the plans come back with it.
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { failure, makeNote, request, type Note } from '../src/api/client';
 import { useSession } from '../src/session';
+import { isoOfDay } from '../src/features/days';
 import { loadPlans, namesOf } from '../src/features/screens';
-import { Bar, Button, ChipGroup, Field, List, ListRow, Notice, Screen, styles } from '../src/features/ui';
+import { Bar, Button, ChipGroup, DateField, List, ListRow, Notice, Screen, styles } from '../src/features/ui';
 
 const SLOTS = [
   { id: 'sáng', label: 'Sáng' },
@@ -19,7 +21,7 @@ const SLOTS = [
 
 export default function MealPlanRoute() {
   const session = useSession();
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(isoOfDay(new Date()));
   const [plans, setPlans] = useState<Record<string, unknown>[]>([]);
   const [foods, setFoods] = useState<Record<string, string>>({});
   const [slot, setSlot] = useState('');
@@ -27,10 +29,6 @@ export default function MealPlanRoute() {
   const [note, setNote] = useState<Note>(makeNote('', false));
 
   async function reload() {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      setPlans([]);
-      return;
-    }
     const [foodsOut] = await Promise.all([
       request('/food/', { token: session.token }),
       loadPlans({ token: session.token, offline: session.offline, dispatch: (rows) => setPlans(rows as Record<string, unknown>[]) }, date),
@@ -38,7 +36,7 @@ export default function MealPlanRoute() {
     setFoods(namesOf(foodsOut, 'foods'));
   }
 
-  // The date field is the only way in; when it changes, the day's plans come back with it.
+  // The day is the only way in; when it changes, the day's plans come back with it.
   useEffect(() => {
     if (session.token) reload();
   }, [session.token, session.base, date]);
@@ -56,10 +54,6 @@ export default function MealPlanRoute() {
   }
 
   async function save() {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      setNote(makeNote('Ngày phải viết dạng YYYY-MM-DD', true));
-      return;
-    }
     if (!slot) {
       setNote(makeNote('Chạm vào bữa cần đặt trước', true));
       return;
@@ -96,7 +90,7 @@ export default function MealPlanRoute() {
       <Bar title="Kế hoạch bữa ăn" sub="đặt món cho một ngày" />
       <Screen>
         <Notice note={note} />
-        <Field label="Ngày" value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" />
+        <DateField label="Ngày" value={date} onChange={setDate} />
         <List>
           {SLOTS.map((row) => {
             const plan = planFor(row.id);
